@@ -1,0 +1,4 @@
+*.egg
+.tox
+.testrepository
+*.py[cod]
