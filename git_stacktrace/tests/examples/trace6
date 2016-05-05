@@ -1,0 +1,6 @@
+Traceback (most recent call last):
+  File "/mnt/builds/VXmUJO4bRX26CecfwlI_hw_9f779bf/webapp/framework/resource.py", line 72, in _call
+    result = getattr(self, method_name)()
+  File "/mnt/builds/VXmUJO4bRX26CecfwlI_hw_9f779bf/webapp/resources/interests_resource.py", line 232, in get
+    if self.options['from_navigate'] == "true":
+KeyError

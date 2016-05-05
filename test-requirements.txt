@@ -1,0 +1,6 @@
+testtools
+flake8
+testrepository
+python-subunit
+fixtures
+mock

@@ -1,0 +1,10 @@
+Traceback (most recent call last):
+  File "../api/extensions/pin_extensions.py", line 260, in _map_usm_upsell_info
+    upsell_info_list)
+  File "/mnt/virtualenv_A/local/lib/python2.7/site-packages/pinstatsd/statsd.py", line 98, in decorated_function
+    return_value = func(*args, **kwargs)
+  File "../core/utils/usm_utils.py", line 568, in get_usm_upsell
+    gk)
+  File "../core/utils/usm_utils.py", line 462, in _get_upsell_dict
+    experiment)
+UnboundLocalError

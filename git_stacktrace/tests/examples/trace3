@@ -1,0 +1,8 @@
+Traceback (most recent call last):
+  File "../common/utils/geo_utils.py", line 68, in get_ip_geo
+    return get_geo_db().record_by_addr(ip_address)
+  File "/mnt/virtualenv_A/local/lib/python2.7/site-packages/pygeoip/__init__.py", line 563, in record_by_addr
+    ipnum = util.ip2long(addr)
+  File "/mnt/virtualenv_A/local/lib/python2.7/site-packages/pygeoip/util.py", line 36, in ip2long
+    return int(binascii.hexlify(socket.inet_pton(socket.AF_INET6, ip)), 16)
+error
