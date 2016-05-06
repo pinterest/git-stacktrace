@@ -1,4 +1,5 @@
 *.egg
+*.egg-info
 .tox
 .testrepository
 *.py[cod]

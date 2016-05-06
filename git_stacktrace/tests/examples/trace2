@@ -1,0 +1,22 @@
+Traceback (most recent call last):
+  File "../core/managers/user_manager.py", line 2672, in _get_pins_from_pintersection_helper
+    user_id, imgsigs, rpc_timeout_ms=rpc_timeout_ms)
+  File "/mnt/virtualenv/local/lib/python2.7/site-packages/thrift_utils/thrift_client_mixin.py", line 210, in wrap_with_pool
+    return method(client, *args, **kwargs)
+  File "/mnt/virtualenv/local/lib/python2.7/site-packages/thrift_utils/thrift_client_mixin.py", line 481, in method_wrapper
+    self.connect(conn_timeout_ms, req_timeout_ms)
+  File "/mnt/virtualenv/local/lib/python2.7/site-packages/thrift_utils/thrift_client_mixin.py", line 721, in connect
+    self._transport.open()
+  File "/mnt/virtualenv/local/lib/python2.7/site-packages/thrift/transport/TTransport.py", line 266, in open
+    return self.__trans.open()
+  File "/mnt/virtualenv/local/lib/python2.7/site-packages/thrift_utils/TNoDelaySocket.py", line 41, in open
+    self.handle.connect(res[4])
+  File "/mnt/virtualenv/local/lib/python2.7/site-packages/gevent/socket.py", line 392, in connect
+    wait_readwrite(sock.fileno(), timeout=timeleft, event=self._rw_event)
+  File "/mnt/virtualenv/local/lib/python2.7/site-packages/gevent/socket.py", line 215, in wait_readwrite
+    switch_result = get_hub().switch()
+  File "../common/utils/patched_greenlet.py", line 187, in switch
+    return gevent.hub.Hub.switch(self)
+  File "/mnt/virtualenv/local/lib/python2.7/site-packages/gevent/hub.py", line 164, in switch
+    return greenlet.switch(self)
+Timeout
