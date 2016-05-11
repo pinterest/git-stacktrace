@@ -1,0 +1,14 @@
+Traceback (most recent call last):
+  File "../core/managers/user_manager.py", line 2835, in add_typed_search_query
+    query)
+  File "/mnt/virtualenv_A/local/lib/python2.7/site-packages/thrift_utils/thrift_client_mixin.py", line 210, in wrap_with_pool
+    return method(client, *args, **kwargs)
+  File "/mnt/virtualenv_A/local/lib/python2.7/site-packages/thrift_utils/thrift_client_mixin.py", line 484, in method_wrapper
+    result = method(self._client, *args, **kwargs)
+  File "../services/dataservices/thrift_libs/DataServices.py", line 1772, in createOrUpdateTypedSearchQuery
+    self.send_createOrUpdateTypedSearchQuery(context, userId, queryType, query)
+  File "../services/dataservices/thrift_libs/DataServices.py", line 1782, in send_createOrUpdateTypedSearchQuery
+    args.write(self._oprot)
+  File "../services/dataservices/thrift_libs/DataServices.py", line 8975, in write
+    oprot.writeString(self.query.encode('utf-8'))
+UnicodeDecodeError
