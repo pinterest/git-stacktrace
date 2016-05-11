@@ -27,11 +27,12 @@ def main():
 
     parse_trace.print_traceback(extracted)
 
-    commit_files = git.files_touched(args.range)
-    trace_files = []
+    # Files
+    trace_files = set()
     for f, line, function, code in extracted:
-        trace_files.append(f)
+        trace_files.add(f)
 
+    commit_files = git.files_touched(args.range)
     commits = lookup_file(commit_files, trace_files)
     print ""
     print ""
