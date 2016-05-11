@@ -27,19 +27,37 @@ def main():
 
     parse_trace.print_traceback(extracted)
 
-    # Files
     trace_files = set()
+    trace_snippets = set()
     for f, line, function, code in extracted:
         trace_files.add(f)
+        trace_snippets.add(code)
+
+    highlighted_code_commits = collections.defaultdict(list)
+    for snippet in trace_snippets:
+        commits = git.pickaxe(snippet, args.range)
+        for commit in commits:
+            highlighted_code_commits[commit].append(snippet)
+
+    print ""
+    print ""
+    print "Commits touching code snippets:"
+    print ""
+    for k, v in highlighted_code_commits.iteritems():
+        git.print_one_commit(k, oneline=True)
+        print "Files:"
+        for f in v:
+            print " * %s" % f
+        print ""
 
     commit_files = git.files_touched(args.range)
-    commits = lookup_file(commit_files, trace_files)
+    highlighted_file_commits = lookup_file(commit_files, trace_files)
     print ""
     print ""
     print "Commits touching related files:"
     print ""
-    for k, v in commits.iteritems():
-        git.print_one_commit(k)
+    for k, v in highlighted_file_commits.iteritems():
+        git.print_one_commit(k, oneline=True)
         print "Files:"
         for f in v:
             print " * %s" % f

@@ -37,7 +37,7 @@ def run_command(*argv, **kwargs):
 def files_touched(git_range):
     """Run git log --pretty="%H" --numstat git_range.
 
-    Generate a list of  files modified by the commits in range
+    Generate a dictionary of files modified by the commits in range
     """
     cmd = 'git', 'log', '--pretty=%H', '--numstat', git_range
     data = run_command(*cmd)
@@ -68,12 +68,29 @@ def files_touched(git_range):
     return commits
 
 
-def print_one_commit(commit):
-    cmd = 'git', 'log', '-1', '--pretty=short', commit
-    print run_command(*cmd)
-    # Find phabricator URL
-    cmd = 'git', 'log', '-1', '--pretty=%b', commit
-    body = run_command(*cmd)
-    for line in body.splitlines():
-        if line.startswith("Differential Revision:"):
-            print line
+def pickaxe(snippet, git_range):
+    """Run git log -S <snippet> <git_range>.
+
+    Use git pickaxe to 'Look for differences that change the number of occurrences of the
+    specified string'
+
+    Return list of commits that modified that snippet
+    """
+    cmd = 'git', 'log', '--pretty=%H', '-S', snippet.decode('string_escape'), git_range
+    commits = run_command(*cmd).splitlines()
+    return commits
+
+
+def print_one_commit(commit, oneline=False):
+    if oneline:
+        cmd = 'git', 'log', '-1', '--oneline', commit
+        print run_command(*cmd)
+    else:
+        cmd = 'git', 'log', '-1', '--pretty=short', commit
+        print run_command(*cmd)
+        # Find phabricator URL
+        cmd = 'git', 'log', '-1', '--pretty=%b', commit
+        body = run_command(*cmd)
+        for line in body.splitlines():
+            if line.startswith("Differential Revision:"):
+                print line
