@@ -1,8 +1,3 @@
-"""
-test_git_stacktrace
-----------------------------------
-Tests for `git_stacktrace` module.
-"""
 import glob
 
 from git_stacktrace.tests import base

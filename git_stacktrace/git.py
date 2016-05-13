@@ -83,7 +83,7 @@ def pickaxe(snippet, git_range):
 
 def print_one_commit(commit, oneline=False):
     if oneline:
-        cmd = 'git', 'log', '-1', '--oneline', commit
+        cmd = 'git', 'log', '--color', '-1', '--oneline', commit
         print run_command(*cmd)
     else:
         cmd = 'git', 'log', '-1', '--pretty=short', commit
