@@ -41,10 +41,10 @@ def main():
     commit_files = git.files_touched(args.range)
     lookup_file(commit_files, trace_files, results)
 
-    for k, v in results.results.iteritems():
+    for r in results.get_sorted_results():
         print ""
-        git.print_one_commit(k, oneline=True)
-        print v
+        git.print_one_commit(r.commit, oneline=True)
+        print r
 
 if __name__ == "__main__":
     main()

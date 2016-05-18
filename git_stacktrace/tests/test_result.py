@@ -38,11 +38,36 @@ class TestResult(base.TestCase):
         expected = "files:\n    - file1\ncode:\n    - \"pass\"\n"
         self.assertEqual(str(commit1), expected)
 
+    def test_rank(self):
+        commit1 = result.Result(self.commit_hash)
+        self.assertEqual(commit1.rank(), 0)
+        commit1.files.add('file1')
+        self.assertEqual(commit1.rank(), 1)
+        commit1.snippets.add('pass')
+        self.assertEqual(commit1.rank(), 3)
+
 
 class TestResults(base.TestCase):
+
     def test_results(self):
         results = result.Results()
         commit1 = results.get_result('hash1')
         commit1.files.add('file1')
         commit2 = results.get_result('hash1')
         self.assertEquals(commit1, commit2)
+
+    def test_sorted_results(self):
+        results = result.Results()
+        commit2 = results.get_result('hash2')
+        commit1 = results.get_result('hash1')
+        commit1.files.add('file1')
+        expected = [commit1, commit2]
+        self.assertEquals(results.get_sorted_results(), expected)
+
+    def test_sorted_results_inverse(self):
+        results = result.Results()
+        commit1 = results.get_result('hash1')
+        commit1.files.add('file1')
+        commit2 = results.get_result('hash2')
+        expected = [commit1, commit2]
+        self.assertEquals(results.get_sorted_results(), expected)

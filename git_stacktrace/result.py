@@ -26,6 +26,9 @@ class Result(object):
 
         return result
 
+    def rank(self):
+        return len(self.files) + len(self.snippets)*2
+
 
 class Results(object):
     """List of results."""
@@ -37,3 +40,8 @@ class Results(object):
         if commit not in self.results:
             self.results[commit] = Result(commit)
         return self.results[commit]
+
+    def get_sorted_results(self):
+        """Return list of results sorted by rank"""
+        results = self.results.values()
+        return sorted(results, key=lambda r: r.rank(), reverse=True)
