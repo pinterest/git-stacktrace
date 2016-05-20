@@ -21,6 +21,7 @@ def extract_python_traceback(blob):
     else:
         print blob
         raise Exception("Unknown input format")
+    # TODO better logging if cannot read traceback
     # filter out traceback lines
     lines = [line for line in lines if line.startswith('  ')]
     # extract
