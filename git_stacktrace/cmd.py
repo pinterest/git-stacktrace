@@ -14,12 +14,16 @@ def lookup_file(commit_files, trace_files, results):
 
 
 def main():
-    usage = "git stacktrace [RANGE] [STACKTRACE FILE]"
+    usage = "git stacktrace [RANGE] [STACKTRACE IN FILE]"
     description = "Lookup commits related to a given stacktrace"
     parser = argparse.ArgumentParser(usage=usage, description=description)
     parser.add_argument('range', help='git commit range to use')
     parser.add_argument('stacktrace', help='stacktrace filename')
     args = parser.parse_args()
+
+    if not git.valid_range(args.range):
+        print "Found no commits in '%s'" % args.range
+        exit(1)
 
     extracted = parse_trace.extract_python_traceback_from_file(args.stacktrace)
 

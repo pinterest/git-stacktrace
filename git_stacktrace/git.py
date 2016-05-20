@@ -94,3 +94,13 @@ def print_one_commit(commit, oneline=False):
         for line in body.splitlines():
             if line.startswith("Differential Revision:"):
                 print line
+
+def valid_range(git_range):
+    """Make sure there are commits in the range
+
+    Generate a dictionary of files modified by the commits in range
+    """
+    cmd = 'git', 'log', '--oneline', git_range
+    data = run_command(*cmd)
+    lines = data.splitlines()
+    return len(lines) > 0
