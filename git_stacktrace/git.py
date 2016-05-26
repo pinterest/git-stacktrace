@@ -87,18 +87,23 @@ def pickaxe(snippet, git_range, filename=None):
 
 
 def print_one_commit(commit, oneline=False):
+    # Only use color if output is a terminal
+    if sys.stdout.isatty():
+        cmd_prefix = 'git', 'log', '--color', '-1'
+    else:
+        cmd_prefix = 'git', 'log', '-1'
     if oneline:
-        cmd = 'git', 'log', '--color', '-1', '--oneline', commit
+        cmd = cmd_prefix + ('--oneline', commit)
         print run_command(*cmd)
     else:
-        cmd = 'git', 'log', '-1', '--pretty=short', commit
+        cmd = cmd_prefix + ('--pretty=short', commit)
         print run_command(*cmd)
-        # Find phabricator URL
-        cmd = 'git', 'log', '-1', '--pretty=%b', commit
-        body = run_command(*cmd)
-        for line in body.splitlines():
-            if line.startswith("Differential Revision:"):
-                print line
+    # Find phabricator URL
+    cmd = 'git', 'log', '-1', '--pretty=%b', commit
+    body = run_command(*cmd)
+    for line in body.splitlines():
+        if line.startswith("Differential Revision:"):
+            print line
 
 
 def valid_range(git_range):
