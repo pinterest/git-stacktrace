@@ -110,3 +110,10 @@ def valid_range(git_range):
     data = run_command(*cmd)
     lines = data.splitlines()
     return len(lines) > 0
+
+
+def convert_since(since):
+    cmd = 'git', 'log', '--pretty=%H', "--since=%s" % since
+    data = run_command(*cmd)
+    lines = data.splitlines()
+    return "%s..%s" % (lines[-1], lines[0])

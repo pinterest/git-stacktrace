@@ -19,12 +19,19 @@ def main():
     usage = "git stacktrace [RANGE] [STACKTRACE IN FILE]"
     description = "Lookup commits related to a given stacktrace"
     parser = argparse.ArgumentParser(usage=usage, description=description)
-    parser.add_argument('range', help='git commit range to use')
+    range_group = parser.add_mutually_exclusive_group()
+    range_group.add_argument('--since', help='show commits more recent then a specific date (from git-log)')
+    range_group.add_argument('range', nargs='?', help='git commit range to use')
     parser.add_argument('stacktrace', help='stacktrace filename')
     args = parser.parse_args()
 
-    if not git.valid_range(args.range):
-        print "Found no commits in '%s'" % args.range
+    if args.since:
+        git_range = git.convert_since(args.since)
+    else:
+        git_range = args.range
+
+    if not git.valid_range(git_range):
+        print "Found no commits in '%s'" % git_range
         exit(1)
 
     traceback = parse_trace.Traceback(filename=args.stacktrace)
@@ -33,11 +40,11 @@ def main():
 
     results = result.Results()
 
-    commit_files = git.files_touched(args.range)
+    commit_files = git.files_touched(git_range)
     lookup_files(commit_files, traceback, results)
 
     for line in traceback.lines:
-        commits = git.pickaxe(line.code, args.range, line.git_filename)
+        commits = git.pickaxe(line.code, git_range, line.git_filename)
         for commit in commits:
             results.get_result(commit).snippets.add(line.code)
 
