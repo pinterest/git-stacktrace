@@ -53,5 +53,8 @@ def main():
         git.print_one_commit(r.commit, oneline=True)
         print r
 
+    if len(results.get_sorted_results()) == 0:
+        print "No matches found"
+
 if __name__ == "__main__":
     main()
