@@ -25,13 +25,13 @@ def main():
         print "Found no commits in '%s'" % args.range
         exit(1)
 
-    extracted = parse_trace.extract_python_traceback_from_file(args.stacktrace)
+    traceback = parse_trace.Traceback(filename=args.stacktrace)
 
-    parse_trace.print_traceback(extracted)
+    traceback.print_traceback()
 
     trace_files = set()
     trace_snippets = set()
-    for f, line, function, code in extracted:
+    for f, line, function, code in traceback.extracted:
         trace_files.add(f)
         trace_snippets.add(code)
 

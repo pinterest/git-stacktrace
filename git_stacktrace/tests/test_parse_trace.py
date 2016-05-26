@@ -15,11 +15,12 @@ class TestParseStacktrace(base.TestCase):
     def test_extract_traceback_from_file(self):
         # extract_python_traceback_from_file will raise an exception if it incorrectly parses a file
         for filename in glob.glob('git_stacktrace/tests/examples/trace*'):
-            extracted = parse_trace.extract_python_traceback_from_file(filename)
+            traceback = parse_trace.Traceback(filename=filename, filter_site_packages=False)
             if filename == 'git_stacktrace/tests/examples/trace3':
-                self.assertEqual(extracted, self.trace3_expected)
+                self.assertEqual(traceback.extracted, self.trace3_expected)
 
     def test_filter_site_packages(self):
         self.assertEqual(
-                parse_trace.filter_site_packages(self.trace3_expected),
+                parse_trace.Traceback(filename='git_stacktrace/tests/examples/trace3',
+                                      filter_site_packages=True).extracted,
                 [('../common/utils/geo_utils.py', 68, 'get_ip_geo', 'return get_geo_db().record_by_addr(ip_address)')])
