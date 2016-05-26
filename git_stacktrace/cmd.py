@@ -5,11 +5,13 @@ from git_stacktrace import git
 from git_stacktrace import result
 
 
-def lookup_file(commit_files, trace_files, results):
+def lookup_files(commit_files, traceback, results):
+    """Populate results and line.git_filename."""
     for commit, file_list in commit_files.iteritems():
         for git_file in file_list:
-            for f in trace_files:
-                if git_file in f:
+            for line in traceback.lines:
+                if git_file in line.trace_filename:
+                    line.git_filename = git_file
                     results.get_result(commit).files.add(git_file)
 
 
@@ -29,21 +31,15 @@ def main():
 
     traceback.print_traceback()
 
-    trace_files = set()
-    trace_snippets = set()
-    for f, line, function, code in traceback.extracted:
-        trace_files.add(f)
-        trace_snippets.add(code)
-
     results = result.Results()
 
-    for snippet in trace_snippets:
-        commits = git.pickaxe(snippet, args.range)
-        for commit in commits:
-            results.get_result(commit).snippets.add(snippet)
-
     commit_files = git.files_touched(args.range)
-    lookup_file(commit_files, trace_files, results)
+    lookup_files(commit_files, traceback, results)
+
+    for line in traceback.lines:
+        commits = git.pickaxe(line.code, args.range, line.git_filename)
+        for commit in commits:
+            results.get_result(commit).snippets.add(line.code)
 
     for r in results.get_sorted_results():
         print ""

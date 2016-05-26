@@ -68,15 +68,20 @@ def files_touched(git_range):
     return commits
 
 
-def pickaxe(snippet, git_range):
-    """Run git log -S <snippet> <git_range>.
+def pickaxe(snippet, git_range, filename=None):
+    """Run git log -S <snippet> <git_range> <filename>
 
     Use git pickaxe to 'Look for differences that change the number of occurrences of the
     specified string'
 
+    If filename is passed in only look in that file
+
     Return list of commits that modified that snippet
     """
-    cmd = 'git', 'log', '--pretty=%H', '-S', snippet.decode('string_escape'), git_range
+    if filename:
+        cmd = 'git', 'log', '--pretty=%H', '-S', snippet.decode('string_escape'), git_range, filename
+    else:
+        cmd = 'git', 'log', '--pretty=%H', '-S', snippet.decode('string_escape'), git_range
     commits = run_command(*cmd).splitlines()
     return commits
 

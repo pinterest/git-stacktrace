@@ -8,10 +8,24 @@ import traceback
 # TODO turn this into different classes for different languages
 
 
-class Traceback(object):
+class Line(object):
+    """Track data for each line in stacktrace"""
+    def __init__(self, filename, line_number, function_name, code):
+        self.trace_filename = filename
+        self.line_number = line_number
+        self.function_name = function_name
+        self.code = code
+        self.git_filename = None
 
-    def __init__(self, blob=None, filename=None, filter_site_packages=True):
-        self.extracted = None
+    def traceback_format(self):
+        return (self.trace_filename, self.line_number, self.function_name, self.code)
+
+
+class Traceback(object):
+    """Parse Traceback string."""
+
+    def __init__(self, blob=None, filename=None, filter_site_packages=False):
+        self.lines = None
         if blob:
             self.extract_python_traceback(blob)
         elif filename:
@@ -46,16 +60,17 @@ class Traceback(object):
                     print line
                     raise Exception("Something went wrong parsing stacktrace input.")
                 f = words[0].split('"')[1].strip()
-                line = int(words[1].split(' ')[1])
-                function = ' '.join(words[2].split(' ')[1:]).strip()
-                extracted.append((f, line, function, str(lines[i+1].strip())))
+                line_number = int(words[1].split(' ')[1])
+                function_name = ' '.join(words[2].split(' ')[1:]).strip()
+                extracted.append(Line(f, line_number, function_name, str(lines[i+1].strip())))
+        self.lines = extracted
         # Sanity check
-        new_lines = traceback.format_list(extracted)
+        new_lines = traceback.format_list(self.traceback_format())
         new_lines = ('\n'.join([l.rstrip() for l in new_lines]))
         lines = ('\n'.join(lines))
         if lines != new_lines:
             raise Exception("Incorrectly extracted traceback information")
-        self.extracted = extracted
+        self.lines = extracted
 
     def extract_python_traceback_from_file(self, filename):
         with open(filename) as f:
@@ -64,13 +79,16 @@ class Traceback(object):
 
     def filter_site_packages(self):
         filtered = []
-        for f, line, func, code in self.extracted:
-            if '/site-packages/' not in f:
-                filtered.append((f, line, func, code))
-        print filtered
-        self.extracted = filtered
+        for line in self.lines:
+            if '/site-packages/' not in line.trace_filename:
+                filtered.append(line)
+        self.lines = filtered
+
+    def traceback_format(self):
+        return [line.traceback_format() for line in self.lines]
 
     def print_traceback(self):
+        lines = self.traceback_format()
         print "Traceback:"
-        for line in traceback.format_list(self.extracted):
+        for line in traceback.format_list(lines):
             print line.rstrip()
