@@ -95,6 +95,7 @@ def print_one_commit(commit, oneline=False):
             if line.startswith("Differential Revision:"):
                 print line
 
+
 def valid_range(git_range):
     """Make sure there are commits in the range
 
