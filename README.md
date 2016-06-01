@@ -1,5 +1,5 @@
 git-stacktrace
-=============:=
+==============
 
 Use git to figure out what commits are related to a stacktrace
 
