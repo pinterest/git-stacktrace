@@ -78,12 +78,39 @@ def pickaxe(snippet, git_range, filename=None):
 
     Return list of commits that modified that snippet
     """
+    cmd = 'git', 'log', '-b', '--pretty=%H', '-S', snippet.decode('string_escape'), git_range
     if filename:
-        cmd = 'git', 'log', '--pretty=%H', '-S', snippet.decode('string_escape'), git_range, filename
-    else:
-        cmd = 'git', 'log', '--pretty=%H', '-S', snippet.decode('string_escape'), git_range
+        cmd = cmd + (filename,)
     commits = run_command(*cmd).splitlines()
+    commits = [(commit, line_removed(snippet, commit)) for commit in commits]
+    # Couldn't find a good way to POSIX regex escape the code and use regex
+    # pickaxe to match full lines, so filter out partial results here.
+    # Filter out results that aren't a full line
+    commits = [commit for commit in commits if commit[1] is not None]
     return commits
+
+
+def line_removed(target_line, commit):
+    """Given a commit tell if target_line was added or removed.
+
+    True if line was removed
+    False if added
+    None if target_line wasn't found at all (because not a full line etc.)
+    """
+    cmd = 'git', 'log', '-1', '--format=', '-p', str(commit)
+    lines = run_command(*cmd).splitlines()
+    for line in lines:
+        check = False
+        removed = False
+        if line.startswith('-'):
+            removed = True
+            check = True
+        elif line.startswith('+'):
+            check = True
+        if check and target_line == line[1:].strip():
+            return removed
+    # target_line matched part of a line instead of a full line
+    return None
 
 
 def print_one_commit(commit, oneline=False):

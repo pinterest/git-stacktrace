@@ -21,21 +21,27 @@ class TestResult(base.TestCase):
         commit1.files.add('file2')
         self.assertEqual(commit1.files, expected_files)
 
-    def test_snippets(self):
+    def test_lines(self):
         commit1 = result.Result(self.commit_hash)
-        expected_snippets = set(['pass', '1+1'])
-        commit1.snippets.add('pass')
-        commit1.snippets.add('pass')
-        commit1.snippets.add('1+1')
-        self.assertEqual(commit1.snippets, expected_snippets)
+        expected_lines_added = set(['pass', '1+1'])
+        expected_lines_removed = set(['1+2'])
+        commit1.lines_added.add('pass')
+        commit1.lines_added.add('pass')
+        commit1.lines_added.add('1+1')
+        self.assertEqual(commit1.lines_added, expected_lines_added)
+        commit1.lines_removed.add('1+2')
+        commit1.lines_removed.add('1+2')
+        self.assertEqual(commit1.lines_removed, expected_lines_removed)
 
     def test_str(self):
         commit1 = result.Result(self.commit_hash)
         commit1.files.add('file1')
         expected = "files:\n    - file1\n"
         self.assertEqual(str(commit1), expected)
-        commit1.snippets.add('pass')
-        expected = "files:\n    - file1\ncode:\n    - \"pass\"\n"
+        commit1.lines_added.add('pass')
+        expected = "files:\n    - file1\nlines added:\n    - \"pass\"\n"
+        commit1.lines_removed.add('True')
+        expected = "files:\n    - file1\nlines added:\n    - \"pass\"\nlines removed:\n    - \"True\"\n"
         self.assertEqual(str(commit1), expected)
 
     def test_rank(self):
@@ -43,8 +49,8 @@ class TestResult(base.TestCase):
         self.assertEqual(commit1.rank(), 0)
         commit1.files.add('file1')
         self.assertEqual(commit1.rank(), 1)
-        commit1.snippets.add('pass')
-        self.assertEqual(commit1.rank(), 3)
+        commit1.lines_added.add('pass')
+        self.assertEqual(commit1.rank(), 4)
 
 
 class TestResults(base.TestCase):

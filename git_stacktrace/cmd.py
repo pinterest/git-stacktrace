@@ -45,8 +45,11 @@ def main():
 
     for line in traceback.lines:
         commits = git.pickaxe(line.code, git_range, line.git_filename)
-        for commit in commits:
-            results.get_result(commit).snippets.add(line.code)
+        for commit, line_removed in commits:
+            if line_removed:
+                results.get_result(commit).lines_removed.add(line.code)
+            else:
+                results.get_result(commit).lines_added.add(line.code)
 
     for r in results.get_sorted_results():
         print ""

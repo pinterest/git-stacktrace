@@ -4,7 +4,8 @@ class Result(object):
     def __init__(self, commit):
         self._commit = commit
         self.files = set()
-        self.snippets = set()
+        self.lines_added = set()
+        self.lines_removed = set()
 
     @property
     def commit(self):
@@ -19,15 +20,19 @@ class Result(object):
             result += "files:\n"
         for f in self.files:
             result += "    - %s\n" % f
-        if len(self.snippets) > 0:
-            result += "code:\n"
-        for snippet in self.snippets:
-            result += '    - "%s"\n' % snippet
+        if len(self.lines_added) > 0:
+            result += "lines added:\n"
+        for line in self.lines_added:
+            result += '    - "%s"\n' % line
+        if len(self.lines_removed) > 0:
+            result += "lines removed:\n"
+        for line in self.lines_removed:
+            result += '    - "%s"\n' % line
 
         return result
 
     def rank(self):
-        return len(self.files) + len(self.snippets)*2
+        return len(self.files) + len(self.lines_added)*3 + len(self.lines_removed)*2
 
 
 class Results(object):
