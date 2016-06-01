@@ -1,8 +1,7 @@
 git-stacktrace
-===============
+=============:=
 
-Lookup commits related to a given stacktrace
-
+Use git to figure out what commits are related to a stacktrace
 
 Installation
 -------------
