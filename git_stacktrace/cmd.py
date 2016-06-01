@@ -16,11 +16,12 @@ def lookup_files(commit_files, traceback, results):
 
 
 def main():
-    usage = "git stacktrace [RANGE] [STACKTRACE IN FILE]"
+    usage = "git stacktrace [<options>] [<RANGE>] <STACKTRACE IN FILE>"
     description = "Lookup commits related to a given stacktrace"
     parser = argparse.ArgumentParser(usage=usage, description=description)
     range_group = parser.add_mutually_exclusive_group()
-    range_group.add_argument('--since', help='show commits more recent then a specific date (from git-log)')
+    range_group.add_argument('--since', metavar="<date1>", help='show commits '
+                             'more recent then a specific date (from git-log)')
     range_group.add_argument('range', nargs='?', help='git commit range to use')
     parser.add_argument('stacktrace', help='stacktrace filename')
     args = parser.parse_args()
