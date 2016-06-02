@@ -3,6 +3,12 @@ git-stacktrace
 
 Use git to figure out what commits are related to a stacktrace
 
+
+Development
+------------
+
+Run tests with: `tox`
+
 Installation
 -------------
 
@@ -10,14 +16,16 @@ TODO
 
 `pip install git-stacktrace`
 
-usage
+Usage
 -----
 
 see `git stacktrace -h`
 
 
-Example
----------
+Examples
+----------
+
+Example output:
 
     $ git stacktrace 04402ca..9f779bf traceback.txt
     Traceback:
@@ -32,3 +40,10 @@ Example
        - webapp/resources/interests_resource.py
     lines added:
        - "if self.options['from_navigate'] == "true":"
+
+Sample stacktraces (from `git_stacktrace/tests/examples/`) and ranges:
+
+* trace1: 95f8278..fdf4c43
+* trace4: 81a25be..b3864b2
+* trace5: 04402ca..9f779bf
+* trace6: 04402ca..9f779bf
