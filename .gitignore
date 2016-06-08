@@ -3,3 +3,7 @@
 .tox
 .testrepository
 *.py[cod]
+AUTHORS
+ChangeLog
+TEST
+build/
