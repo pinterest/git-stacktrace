@@ -44,7 +44,7 @@ class Traceback(object):
             if len(blob) == 1:
                 lines = blob[0].split('\n')
             else:
-                lines = blob
+                lines = [line.rstrip() for line in blob]
         else:
             print blob
             raise Exception("Unknown input format")
@@ -74,7 +74,11 @@ class Traceback(object):
 
     def extract_python_traceback_from_file(self, filename):
         with open(filename) as f:
-            data = f.read().replace('\\n', '\n')
+            data = f.readlines()
+            # remove empty lines
+            data = [line for line in data if line.strip() != '']
+            if len(data) == 1:
+                data = data[0].replace('\\n', '\n').split('\n')
             return self.extract_python_traceback(data)
 
     def filter_site_packages(self):
