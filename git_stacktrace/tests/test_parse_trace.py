@@ -15,15 +15,18 @@ class TestParseStacktrace(base.TestCase):
     def test_extract_traceback_from_file(self):
         # extract_python_traceback_from_file will raise an exception if it incorrectly parses a file
         for filename in glob.glob('git_stacktrace/tests/examples/trace*'):
-            traceback = parse_trace.Traceback(filename=filename, filter_site_packages=False)
-            if filename == 'git_stacktrace/tests/examples/trace3':
-                self.assertEqual(traceback.traceback_format(), self.trace3_expected)
+            with open(filename) as f:
+                traceback = parse_trace.Traceback(f, filter_site_packages=False)
+                if filename == 'git_stacktrace/tests/examples/trace3':
+                    self.assertEqual(traceback.traceback_format(), self.trace3_expected)
 
     def test_filter_site_packages(self):
-        self.assertEqual(
-                parse_trace.Traceback(filename='git_stacktrace/tests/examples/trace3',
-                                      filter_site_packages=True).traceback_format(),
-                [('../common/utils/geo_utils.py', 68, 'get_ip_geo', 'return get_geo_db().record_by_addr(ip_address)')])
+        with open('git_stacktrace/tests/examples/trace3') as f:
+            self.assertEqual(
+                    parse_trace.Traceback(f,
+                                          filter_site_packages=True).traceback_format(),
+                    [('../common/utils/geo_utils.py', 68, 'get_ip_geo',
+                      'return get_geo_db().record_by_addr(ip_address)')])
 
 
 class TestLine(base.TestCase):

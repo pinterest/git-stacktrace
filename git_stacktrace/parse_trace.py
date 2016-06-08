@@ -2,7 +2,6 @@
 
 Currently only supports python stacktraces
 """
-
 import traceback
 
 # TODO turn this into different classes for different languages
@@ -24,19 +23,18 @@ class Line(object):
 class Traceback(object):
     """Parse Traceback string."""
 
-    def __init__(self, blob=None, filename=None, filter_site_packages=False):
+    def __init__(self, blob, filter_site_packages=False):
         self.lines = None
-        if blob:
-            self.extract_python_traceback(blob)
-        elif filename:
-            self.extract_python_traceback_from_file(filename)
-        else:
-            raise Exception("Must specify either a file or a blob")
+        self.extract_python_traceback(blob)
         if filter_site_packages:
             self.filter_site_packages()
 
     def extract_python_traceback(self, blob):
         """Convert traceback string into a traceback.extract_tb format"""
+        # remove empty lines
+        blob = [line for line in blob if line.strip() != '']
+        if len(blob) == 1:
+            blob = blob[0].replace('\\n', '\n').split('\n')
         # Split by line
         if type(blob) == str:
             lines = blob.split('\n')
@@ -71,15 +69,6 @@ class Traceback(object):
         if lines != new_lines:
             raise Exception("Incorrectly extracted traceback information")
         self.lines = extracted
-
-    def extract_python_traceback_from_file(self, filename):
-        with open(filename) as f:
-            data = f.readlines()
-            # remove empty lines
-            data = [line for line in data if line.strip() != '']
-            if len(data) == 1:
-                data = data[0].replace('\\n', '\n').split('\n')
-            return self.extract_python_traceback(data)
 
     def filter_site_packages(self):
         filtered = []

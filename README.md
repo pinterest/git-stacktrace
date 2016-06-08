@@ -27,7 +27,7 @@ Examples
 
 Example output:
 
-    $ git stacktrace 04402ca..9f779bf traceback.txt
+    $ cat traceback | git stacktrace 04402ca..9f779bf
     Traceback:
      File "/mnt/builds/VXmUJO4bRX26CecfwlI_hw_9f779bf/webapp/denzel/resource.py", line 72, in _call
        result = getattr(self, method_name)()
