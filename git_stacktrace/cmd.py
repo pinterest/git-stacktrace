@@ -1,4 +1,5 @@
 import argparse
+import sys
 
 from git_stacktrace import parse_trace
 from git_stacktrace import git
@@ -28,6 +29,7 @@ def main():
 
     if args.since:
         git_range = git.convert_since(args.since)
+        print >> sys.stderr, "commit range: %s" % git_range
     else:
         git_range = args.range
 
