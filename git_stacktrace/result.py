@@ -1,3 +1,6 @@
+from git_stacktrace import git
+
+
 class Result(object):
     """Track matches to stacktrace in a given commit."""
 
@@ -16,6 +19,7 @@ class Result(object):
 
     def __str__(self):
         result = ""
+        result += git.format_one_commit(self.commit) + '\n'
         if len(self.files) > 0:
             result += "files:\n"
         for f in self.files:
@@ -28,8 +32,17 @@ class Result(object):
             result += "lines removed:\n"
         for line in self.lines_removed:
             result += '    - "%s"\n' % line
-
         return result
+
+    def __iter__(self):
+        oneline_output, full, url = git.get_commit_info(self.commit, color=False)
+        yield 'commit', self.commit
+        yield 'oneline', oneline_output
+        yield 'full', full
+        yield 'url', url
+        yield 'files', list(self.files)
+        yield 'lines_added', list(self.lines_added)
+        yield 'lines_removed', list(self.lines_removed)
 
     def rank(self):
         return len(self.files) + len(self.lines_added)*3 + len(self.lines_removed)*2
@@ -50,3 +63,8 @@ class Results(object):
         """Return list of results sorted by rank"""
         results = self.results.values()
         return sorted(results, key=lambda r: r.rank(), reverse=True)
+
+    def get_sorted_results_by_dict(self):
+        """Return a list of dictionaries of the results sorted by rank"""
+        results = self.get_sorted_results()
+        return [dict(r) for r in results]

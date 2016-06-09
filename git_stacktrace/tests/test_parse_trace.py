@@ -16,17 +16,25 @@ class TestParseStacktrace(base.TestCase):
         # extract_python_traceback_from_file will raise an exception if it incorrectly parses a file
         for filename in glob.glob('git_stacktrace/tests/examples/trace*'):
             with open(filename) as f:
-                traceback = parse_trace.Traceback(f, filter_site_packages=False)
+                traceback = parse_trace.Traceback(f.readlines(), filter_site_packages=False)
                 if filename == 'git_stacktrace/tests/examples/trace3':
-                    self.assertEqual(traceback.traceback_format(), self.trace3_expected)
+                    self.assertEqual(self.trace3_expected, traceback.traceback_format())
 
     def test_filter_site_packages(self):
         with open('git_stacktrace/tests/examples/trace3') as f:
             self.assertEqual(
-                    parse_trace.Traceback(f,
-                                          filter_site_packages=True).traceback_format(),
-                    [('../common/utils/geo_utils.py', 68, 'get_ip_geo',
-                      'return get_geo_db().record_by_addr(ip_address)')])
+                             [('../common/utils/geo_utils.py', 68, 'get_ip_geo',
+                               'return get_geo_db().record_by_addr(ip_address)')],
+                             parse_trace.Traceback(f.readlines(), filter_site_packages=True).traceback_format(),
+                 )
+
+    def test_str(self):
+        expected = ('  File "../common/utils/geo_utils.py", line 68, in get_ip_geo\n'
+                    '    return get_geo_db().record_by_addr(ip_address)\n')
+        with open('git_stacktrace/tests/examples/trace3') as f:
+            self.assertEqual(
+                    expected,
+                    str(parse_trace.Traceback(f.readlines(), filter_site_packages=True)))
 
 
 class TestLine(base.TestCase):
@@ -34,4 +42,4 @@ class TestLine(base.TestCase):
         line_data = ("./file", 1, 'foo', 'pass')
         line = parse_trace.Line(*line_data)
         line.git_filename = "file"
-        self.assertEqual(line.traceback_format(), line_data)
+        self.assertEqual(line_data, line.traceback_format())

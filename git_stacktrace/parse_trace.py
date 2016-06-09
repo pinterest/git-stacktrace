@@ -32,11 +32,12 @@ class Traceback(object):
     def extract_python_traceback(self, blob):
         """Convert traceback string into a traceback.extract_tb format"""
         # remove empty lines
-        blob = [line for line in blob if line.strip() != '']
-        if len(blob) == 1:
-            blob = blob[0].replace('\\n', '\n').split('\n')
+        if type(blob) == list:
+            blob = [line for line in blob if line.strip() != '']
+            if len(blob) == 1:
+                blob = blob[0].replace('\\n', '\n').split('\n')
         # Split by line
-        if type(blob) == str:
+        if type(blob) == str or type(blob) == unicode:
             lines = blob.split('\n')
         elif type(blob) == list:
             if len(blob) == 1:
@@ -48,7 +49,7 @@ class Traceback(object):
             raise Exception("Unknown input format")
         # TODO better logging if cannot read traceback
         # filter out traceback lines
-        lines = [line for line in lines if line.startswith('  ')]
+        lines = [line.rstrip() for line in lines if line.startswith('  ')]
         # extract
         extracted = []
         for i, line in enumerate(lines):
@@ -68,7 +69,6 @@ class Traceback(object):
         lines = ('\n'.join(lines))
         if lines != new_lines:
             raise Exception("Incorrectly extracted traceback information")
-        self.lines = extracted
 
     def filter_site_packages(self):
         filtered = []
@@ -80,8 +80,6 @@ class Traceback(object):
     def traceback_format(self):
         return [line.traceback_format() for line in self.lines]
 
-    def print_traceback(self):
+    def __str__(self):
         lines = self.traceback_format()
-        print "Traceback:"
-        for line in traceback.format_list(lines):
-            print line.rstrip()
+        return ''.join(traceback.format_list(lines))
