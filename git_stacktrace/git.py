@@ -154,3 +154,11 @@ def convert_since(since):
     data = run_command(*cmd)
     lines = data.splitlines()
     return "%s..%s" % (lines[-1], lines[0])
+
+
+def files(git_range):
+    commit = git_range.split('.')[-1]
+    cmd = 'git', 'ls-tree', '-r', '--name-only', commit
+    data = run_command(*cmd)
+    files = data.splitlines()
+    return files
