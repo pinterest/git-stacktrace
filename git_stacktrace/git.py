@@ -1,7 +1,12 @@
+import collections
+import re
 import subprocess
 import sys
 import shlex
 import os
+
+
+SHA1_REGEX = re.compile(r'\b[0-9a-f]{40}\b')
 
 
 def run_command_status(*argv, **kwargs):
@@ -39,32 +44,15 @@ def files_touched(git_range):
 
     Generate a dictionary of files modified by the commits in range
     """
-    cmd = 'git', 'log', '--pretty=%H', '--numstat', git_range
+    cmd = 'git', 'log', '--pretty=%H', '--name-only', git_range
     data = run_command(*cmd)
-    commits = {}
+    commits = collections.defaultdict(list)
     commit = None
-    lines = []
     for line in data.splitlines():
-        tokens = line.split('\t')
-        if len(tokens) == 1:
-            # Must be a hash
-            if len(tokens[0]) == 0:
-                # empty line
-                continue
-            if commit is not None:
-                # Found next commit
-                commits[commit] = lines
-                lines = []
-                commit = None
-            commit = tokens[0]
-        elif len(tokens) == 0:
-            # blank line
-            pass
-        elif len(tokens) == 3:
-            # file diff and names
-            lines.append(tokens[2])
-        else:
-            raise Exception("Something went wrong parsing git log")
+        if SHA1_REGEX.match(line):
+            commit = line
+        elif line.strip():
+            commits[commit].append(line)
     return commits
 
 
