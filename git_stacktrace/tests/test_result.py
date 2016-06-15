@@ -80,7 +80,7 @@ class TestResults(base.TestCase):
         commit1 = results.get_result('hash1')
         commit1.files.add('file1')
         commit2 = results.get_result('hash1')
-        self.assertEquals(commit1, commit2)
+        self.assertEqual(commit1, commit2)
 
     def test_sorted_results(self):
         results = result.Results()
@@ -88,7 +88,7 @@ class TestResults(base.TestCase):
         commit1 = results.get_result('hash1')
         commit1.files.add('file1')
         expected = [commit1, commit2]
-        self.assertEquals(expected, results.get_sorted_results())
+        self.assertEqual(expected, results.get_sorted_results())
 
     def test_sorted_results_inverse(self):
         results = result.Results()
@@ -96,7 +96,7 @@ class TestResults(base.TestCase):
         commit1.files.add('file1')
         commit2 = results.get_result('hash2')
         expected = [commit1, commit2]
-        self.assertEquals(expected, results.get_sorted_results())
+        self.assertEqual(expected, results.get_sorted_results())
 
     @mock.patch('git_stacktrace.git.get_commit_info')
     def test_get_sorted_results_by_dict(self, mocked_git_info):

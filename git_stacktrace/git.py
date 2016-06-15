@@ -141,6 +141,8 @@ def convert_since(since):
     cmd = 'git', 'log', '--pretty=%H', "--since=%s" % since
     data = run_command(*cmd)
     lines = data.splitlines()
+    if len(lines) == 0:
+        raise Exception("Didn't find any commits in 'since' range, try updating your git repo")
     return "%s..%s" % (lines[-1], lines[0])
 
 
