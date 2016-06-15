@@ -15,7 +15,9 @@ def _lookup_files(commit_files, git_files, traceback, results):
 
 
 def lookup_stacktrace(traceback, git_range):
-    # TODO docs and tests
+    """Lookup to see what commits in git_range could have caused the stacktrace.
+
+    Pass in a stacktrace object and returns a results object."""
     results = result.Results()
 
     commit_files = git.files_touched(git_range)
