@@ -2,16 +2,23 @@ from git_stacktrace import git
 from git_stacktrace import result
 
 
+def _longest_filename(matches):
+    """find longest match by number of '/'."""
+    return max(matches, key=lambda filename: len(filename.split('/')))
+
+
 def _lookup_files(commit_files, git_files, traceback, results):
     """Populate results and line.git_filename."""
     for line in traceback.lines:
         matches = [f for f in git_files if line.trace_filename.endswith(f)]
         if matches:
-            git_file = max([f for f in git_files if line.trace_filename.endswith(f)], key=lambda x: len(x))
+            git_file = _longest_filename([f for f in git_files if line.trace_filename.endswith(f)])
             for commit, file_list in commit_files.iteritems():
                 if git_file in file_list:
                     line.git_filename = git_file
                     results.get_result(commit).files.add(git_file)
+            if line.git_filename is None:
+                line.git_filename = _longest_filename(matches)
 
 
 def lookup_stacktrace(traceback, git_range):
