@@ -36,15 +36,16 @@ class TestResult(base.TestCase):
 
     @mock.patch('git_stacktrace.git.get_commit_info')
     def test_str(self, mocked_git_info):
-        mocked_git_info.return_value = "oneline", "full", "url"
+        mocked_git_info.return_value = "custom", "full", "url"
         commit1 = result.Result(self.commit_hash)
         commit1.files.add('file1')
-        expected = "oneline\n\turl\nfiles:\n    - file1\n"
+        expected = "custom\nLink:        url\nFiles:\n    - file1\n"
         self.assertEqual(expected, str(commit1))
         commit1.lines_added.add('pass')
-        expected = "oneline\n\turl\nfiles:\n    - file1\nlines added:\n    - \"pass\"\n"
+        expected = "custom\nLink:        url\nFiles:\n    - file1\nLines Added:\n    - \"pass\"\n"
         commit1.lines_removed.add('True')
-        expected = "oneline\n\turl\nfiles:\n    - file1\nlines added:\n    - \"pass\"\nlines removed:\n    - \"True\"\n"
+        expected = ("custom\nLink:        url\nFiles:\n    - file1\nLines Added:\n    - \"pass\"\nLines "
+                    "Removed:\n    - \"True\"\n")
         self.assertEqual(expected, str(commit1))
 
     def test_rank(self):
@@ -57,7 +58,7 @@ class TestResult(base.TestCase):
 
     @mock.patch('git_stacktrace.git.get_commit_info')
     def test_dict(self, mocked_git_info):
-        mocked_git_info.return_value = "oneline", "full", "url"
+        mocked_git_info.return_value = "custom", "full", "url"
         commit1 = result.Result(self.commit_hash)
         commit1.files.add('file1')
         commit1.lines_removed.add('True')
@@ -68,7 +69,7 @@ class TestResult(base.TestCase):
                     'full': 'full',
                     'lines_added': ['pass'],
                     'lines_removed': ['True'],
-                    'oneline': 'oneline',
+                    'custom': 'custom',
                     'url': 'url'}
         self.assertEqual(expected, dict(commit1))
 
@@ -100,7 +101,7 @@ class TestResults(base.TestCase):
 
     @mock.patch('git_stacktrace.git.get_commit_info')
     def test_get_sorted_results_by_dict(self, mocked_git_info):
-        mocked_git_info.return_value = "oneline", "full", "url"
+        mocked_git_info.return_value = "custom", "full", "url"
         results = result.Results()
         commit2 = results.get_result('hash2')
         commit1 = results.get_result('hash1')

@@ -103,9 +103,9 @@ def line_removed(target_line, commit):
 
 def format_one_commit(commit):
     result = []
-    oneline_output, full, url = get_commit_info(commit)
-    result.append(oneline_output)
-    result.append("\t" + url)
+    custom, full, url = get_commit_info(commit)
+    result.append(custom)
+    result.append("Link:        " + url)
     return '\n'.join(result)
 
 
@@ -115,7 +115,9 @@ def get_commit_info(commit, color=True):
         cmd_prefix = 'git', 'log', '--color', '-1'
     else:
         cmd_prefix = 'git', 'log', '-1'
-    oneline = run_command(*(cmd_prefix + ('--oneline', commit)))
+    git_format = ('--format=%C(auto,yellow)commit %H%C(auto,reset)%n'
+                  'Commit Date: %cD%nAuthor:      %aN <%aE>%nSubject:     %s')
+    custom = run_command(*(cmd_prefix + (git_format, commit)))
 
     # Find phabricator URL
     cmd = 'git', 'log', '-1', '--pretty=%b', commit
@@ -123,7 +125,7 @@ def get_commit_info(commit, color=True):
     for line in full.splitlines():
         if line.startswith("Differential Revision:"):
             url = line.split(' ')[2]
-    return oneline, full, url
+    return custom, full, url
 
 
 def valid_range(git_range):

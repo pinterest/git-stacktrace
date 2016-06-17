@@ -21,23 +21,23 @@ class Result(object):
         result = ""
         result += git.format_one_commit(self.commit) + '\n'
         if len(self.files) > 0:
-            result += "files:\n"
+            result += "Files:\n"
         for f in self.files:
             result += "    - %s\n" % f
         if len(self.lines_added) > 0:
-            result += "lines added:\n"
+            result += "Lines Added:\n"
         for line in self.lines_added:
             result += '    - "%s"\n' % line
         if len(self.lines_removed) > 0:
-            result += "lines removed:\n"
+            result += "Lines Removed:\n"
         for line in self.lines_removed:
             result += '    - "%s"\n' % line
         return result
 
     def __iter__(self):
-        oneline_output, full, url = git.get_commit_info(self.commit, color=False)
+        custom, full, url = git.get_commit_info(self.commit, color=False)
         yield 'commit', self.commit
-        yield 'oneline', oneline_output
+        yield 'custom', custom
         yield 'full', full
         yield 'url', url
         yield 'files', list(self.files)
