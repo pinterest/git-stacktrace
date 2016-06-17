@@ -12,9 +12,7 @@ Run tests with: `tox`
 Installation
 -------------
 
-TODO
-
-`pip install git-stacktrace`
+`pip install git_stacktrace`
 
 Usage
 -----
