@@ -1,5 +1,27 @@
+"""
+python API to call git stacktrace.
+
+To use this you should only need to import this module.
+
+Example usage:
+    traceback = api.Traceback(traceback_string)
+    git_range = api.convert_since('1.day')
+    results = api.lookup_stacktrace(traceback, git_range, fast=False)
+    for r in results.get_sorted_results():
+        print ""
+        print r
+
+
+"""
+
+
 from git_stacktrace import git
 from git_stacktrace import result
+from git_stacktrace import parse_trace
+
+
+# So we can call api.Traceback
+Traceback = parse_trace.Traceback
 
 
 def _longest_filename(matches):
@@ -21,6 +43,16 @@ def _lookup_files(commit_files, git_files, traceback, results):
                 line.git_filename = _longest_filename(matches)
 
 
+def convert_since(since):
+    """Calls git.convert_since"""
+    return git.convert_since(since)
+
+
+def valid_range(git_range):
+    """Calls git.valid_range"""
+    return git.valid_range(git_range)
+
+
 def lookup_stacktrace(traceback, git_range, fast):
     """Lookup to see what commits in git_range could have caused the stacktrace.
 
@@ -35,11 +67,12 @@ def lookup_stacktrace(traceback, git_range, fast):
 
     for line in traceback.lines:
         commits = []
-        try:
-            if not (line.git_filename is None and fast is True):
+        if not (line.git_filename is None and fast is True):
+            try:
                 commits = git.pickaxe(line.code, git_range, line.git_filename)
-        except Exception:
-            continue
+            except Exception:
+                # If this fails, move on
+                continue
         for commit, line_removed in commits:
             if line_removed:
                 results.get_result(commit).lines_removed.add(line.code)

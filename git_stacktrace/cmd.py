@@ -3,8 +3,6 @@ import select
 import sys
 
 from git_stacktrace import api
-from git_stacktrace import git
-from git_stacktrace import parse_trace
 
 
 def main():
@@ -20,7 +18,7 @@ def main():
     args = parser.parse_args()
 
     if args.since:
-        git_range = git.convert_since(args.since)
+        git_range = api.convert_since(args.since)
         print >> sys.stderr, "commit range: %s" % git_range
     else:
         if args.range is None:
@@ -29,14 +27,14 @@ def main():
             sys.exit(1)
         git_range = args.range
 
-    if not git.valid_range(git_range):
+    if not api.valid_range(git_range):
         print "Found no commits in '%s'" % git_range
         sys.exit(1)
 
     if not select.select([sys.stdin], [], [], 0.0)[0]:
         raise Exception("No input found in stdin")
     blob = sys.stdin.readlines()
-    traceback = parse_trace.Traceback(blob)
+    traceback = api.Traceback(blob)
 
     print "Traceback:"
     print traceback
