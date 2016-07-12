@@ -15,6 +15,8 @@ def main():
     range_group.add_argument('--since', metavar="<date1>", help='show commits '
                              'more recent then a specific date (from git-log)')
     range_group.add_argument('range', nargs='?', help='git commit range to use')
+    parser.add_argument('-f', '--fast', action="store_true", help='Speed things up by not running '
+                        'pickaxe if cannot find the file')
     args = parser.parse_args()
 
     if args.since:
@@ -39,7 +41,7 @@ def main():
     print "Traceback:"
     print traceback
 
-    results = api.lookup_stacktrace(traceback, git_range)
+    results = api.lookup_stacktrace(traceback, git_range, fast=args.fast)
 
     for r in results.get_sorted_results():
         print ""

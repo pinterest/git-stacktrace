@@ -21,8 +21,10 @@ def _lookup_files(commit_files, git_files, traceback, results):
                 line.git_filename = _longest_filename(matches)
 
 
-def lookup_stacktrace(traceback, git_range):
+def lookup_stacktrace(traceback, git_range, fast):
     """Lookup to see what commits in git_range could have caused the stacktrace.
+
+    If fast is True, don't run pickaxe if cannot find the file in git.
 
     Pass in a stacktrace object and returns a results object."""
     results = result.Results()
@@ -32,8 +34,10 @@ def lookup_stacktrace(traceback, git_range):
     _lookup_files(commit_files, git_files, traceback, results)
 
     for line in traceback.lines:
+        commits = []
         try:
-            commits = git.pickaxe(line.code, git_range, line.git_filename)
+            if not (line.git_filename is None and fast is True):
+                commits = git.pickaxe(line.code, git_range, line.git_filename)
         except Exception:
             continue
         for commit, line_removed in commits:
