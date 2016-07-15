@@ -139,8 +139,10 @@ def valid_range(git_range):
     return len(lines) > 0
 
 
-def convert_since(since):
+def convert_since(since, path=None):
     cmd = 'git', 'log', '--pretty=%H', "--since=%s" % since
+    if path:
+        cmd = cmd + (path,)
     data = run_command(*cmd)
     lines = data.splitlines()
     if len(lines) == 0:

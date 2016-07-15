@@ -15,10 +15,12 @@ def main():
     range_group.add_argument('range', nargs='?', help='git commit range to use')
     parser.add_argument('-f', '--fast', action="store_true", help='Speed things up by not running '
                         'pickaxe if cannot find the file')
+    parser.add_argument('-p', '--path', nargs='?', help='Git path, if using --since, use this to specify which branch '
+                        'to run on.')
     args = parser.parse_args()
 
     if args.since:
-        git_range = api.convert_since(args.since)
+        git_range = api.convert_since(args.since, path=args.path)
         print >> sys.stderr, "commit range: %s" % git_range
     else:
         if args.range is None:

@@ -43,9 +43,9 @@ def _lookup_files(commit_files, git_files, traceback, results):
                 line.git_filename = _longest_filename(matches)
 
 
-def convert_since(since):
+def convert_since(since, path=None):
     """Calls git.convert_since"""
-    return git.convert_since(since)
+    return git.convert_since(since, path=path)
 
 
 def valid_range(git_range):
