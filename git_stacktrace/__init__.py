@@ -1,5 +1,3 @@
-import pbr.version
+import pkg_resources
 
-
-__version__ = pbr.version.VersionInfo(
-    'git_stacktrace').version_string()
+__version__ = pkg_resources.get_provider(pkg_resources.Requirement.parse('git-stacktrace')).version
