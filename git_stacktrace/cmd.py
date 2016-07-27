@@ -1,7 +1,9 @@
 import argparse
+import os
 import select
 import sys
 
+import git_stacktrace
 from git_stacktrace import api
 
 
@@ -17,6 +19,8 @@ def main():
                         'pickaxe if cannot find the file')
     parser.add_argument('-p', '--path', nargs='?', help='Git path, if using --since, use this to specify which branch '
                         'to run on.')
+    parser.add_argument('--version', action="version",
+                        version='%s version %s' % (os.path.split(sys.argv[0])[-1], git_stacktrace.__version__))
     args = parser.parse_args()
 
     if args.since:
