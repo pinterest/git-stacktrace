@@ -4,6 +4,7 @@ git-stacktrace
 git-stacktrace is designed to make it easy to figure out which commit caused a given stacktrace.
 
 git-stacktrace looks for:
+
 * commits in given range that touched files in the stacktrace
 * commits in given range that added/removed code present the stacktrace
 
@@ -11,25 +12,28 @@ git-stacktrace looks for:
 Development
 ------------
 
-Run tests with: `tox`
+Run tests with: ``tox``
 
 Installation
--------------
+------------
 
-`pip install git_stacktrace`
+.. code-block:: sh
+
+    $ pip install git_stacktrace
 
 Usage
 -----
 
-For the CLI see `git stacktrace -h`
+For the CLI see: ``git stacktrace -h``
 
-For the Python API see `git_stacktrace/api.py`
+For the Python API see: ``git_stacktrace/api.py``
 
 
 Examples
-----------
+--------
 
-Example output:
+Example output::
+
 
     $ git stacktrace --since=1.day < trace
     Traceback:
