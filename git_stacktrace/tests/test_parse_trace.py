@@ -16,25 +16,24 @@ class TestParseStacktrace(base.TestCase):
         # extract_python_traceback_from_file will raise an exception if it incorrectly parses a file
         for filename in glob.glob('git_stacktrace/tests/examples/trace*'):
             with open(filename) as f:
-                traceback = parse_trace.Traceback(f.readlines(), filter_site_packages=False)
+                traceback = parse_trace.Traceback(f.readlines())
                 if filename == 'git_stacktrace/tests/examples/trace3':
                     self.assertEqual(self.trace3_expected, traceback.traceback_format())
 
-    def test_filter_site_packages(self):
-        with open('git_stacktrace/tests/examples/trace3') as f:
-            self.assertEqual(
-                             [('../common/utils/geo_utils.py', 68, 'get_ip_geo',
-                               'return get_geo_db().record_by_addr(ip_address)')],
-                             parse_trace.Traceback(f.readlines(), filter_site_packages=True).traceback_format(),
-                 )
-
     def test_str(self):
-        expected = ('  File "../common/utils/geo_utils.py", line 68, in get_ip_geo\n'
-                    '    return get_geo_db().record_by_addr(ip_address)\n')
+        expected = (
+                '  File "../common/utils/geo_utils.py", line 68, in get_ip_geo\n'
+                '    return get_geo_db().record_by_addr(ip_address)\n'
+                '  File "/mnt/virtualenv_A/local/lib/python2.7/site-packages/pygeoip/__init__.py", '
+                'line 563, in record_by_addr\n'
+                '    ipnum = util.ip2long(addr)\n'
+                '  File "/mnt/virtualenv_A/local/lib/python2.7/site-packages/pygeoip/util.py", line 36, in ip2long\n'
+                '    return int(binascii.hexlify(socket.inet_pton(socket.AF_INET6, ip)), 16)\n')
+
         with open('git_stacktrace/tests/examples/trace3') as f:
             self.assertEqual(
                     expected,
-                    str(parse_trace.Traceback(f.readlines(), filter_site_packages=True)))
+                    str(parse_trace.Traceback(f.readlines())))
 
 
 class TestLine(base.TestCase):

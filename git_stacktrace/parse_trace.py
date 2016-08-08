@@ -23,11 +23,9 @@ class Line(object):
 class Traceback(object):
     """Parse Traceback string."""
 
-    def __init__(self, blob, filter_site_packages=False):
+    def __init__(self, blob):
         self.lines = None
         self.extract_python_traceback(blob)
-        if filter_site_packages:
-            self.filter_site_packages()
 
     def extract_python_traceback(self, blob):
         """Convert traceback string into a traceback.extract_tb format"""
@@ -72,13 +70,6 @@ class Traceback(object):
         lines = ('\n'.join(lines))
         if lines != new_lines:
             raise Exception("Incorrectly extracted traceback information")
-
-    def filter_site_packages(self):
-        filtered = []
-        for line in self.lines:
-            if '/site-packages/' not in line.trace_filename:
-                filtered.append(line)
-        self.lines = filtered
 
     def traceback_format(self):
         return [line.traceback_format() for line in self.lines]
