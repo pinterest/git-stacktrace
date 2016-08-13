@@ -40,6 +40,14 @@ class Traceback(object):
         """format extracted traceback in same way as blob."""
         return
 
+    @abc.abstractmethod
+    def file_match(self, trace_filename, git_files):
+        """How to match a trace_filename to git_files.
+
+        Generally this varies depending on which is a substring of the other
+        """
+        return
+
 
 class PythonTraceback(Traceback):
     """Parse Traceback string."""
@@ -94,6 +102,10 @@ class PythonTraceback(Traceback):
     def __str__(self):
         lines = self.traceback_format()
         return ''.join(traceback.format_list(lines))
+
+    def file_match(self, trace_filename, git_files):
+        # trace_filename is substring of git_filename
+        return [f for f in git_files if trace_filename.endswith(f)]
 
 
 def parse_trace(traceback_string):

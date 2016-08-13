@@ -30,9 +30,9 @@ def _longest_filename(matches):
 def _lookup_files(commit_files, git_files, traceback, results):
     """Populate results and line.git_filename."""
     for line in traceback.lines:
-        matches = [f for f in git_files if line.trace_filename.endswith(f)]
+        matches = traceback.file_match(line.trace_filename, git_files)
         if matches:
-            git_file = _longest_filename([f for f in git_files if line.trace_filename.endswith(f)])
+            git_file = _longest_filename(matches)
             for commit, file_list in commit_files.iteritems():
                 if git_file in file_list:
                     line.git_filename = git_file
