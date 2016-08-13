@@ -7,6 +7,10 @@ import traceback
 # TODO turn this into different classes for different languages
 
 
+class ParseException(Exception):
+    pass
+
+
 class Line(object):
     """Track data for each line in stacktrace"""
     def __init__(self, filename, line_number, function_name, code):
@@ -44,7 +48,7 @@ class Traceback(object):
                 lines = [line.rstrip() for line in blob]
         else:
             print blob
-            raise Exception("Unknown input format")
+            raise ParseException("Unknown input format")
         # TODO better logging if cannot read traceback
         # filter out traceback lines
         lines = [line.rstrip() for line in lines if line.startswith('  ')]
@@ -55,21 +59,21 @@ class Traceback(object):
                 words = line.split(', ')
                 if not (words[0].startswith('  File "') and words[1].startswith('line ') and words[2].startswith('in')):
                     print line
-                    raise Exception("Something went wrong parsing stacktrace input.")
+                    raise ParseException("Something went wrong parsing stacktrace input.")
                 f = words[0].split('"')[1].strip()
                 line_number = int(words[1].split(' ')[1])
                 function_name = ' '.join(words[2].split(' ')[1:]).strip()
                 try:
                     extracted.append(Line(f, line_number, function_name, str(lines[i+1].strip())))
                 except IndexError:
-                    raise Exception("Incorrectly extracted traceback information")
+                    raise ParseException("Incorrectly extracted traceback information")
         self.lines = extracted
         # Sanity check
         new_lines = traceback.format_list(self.traceback_format())
         new_lines = ('\n'.join([l.rstrip() for l in new_lines]))
         lines = ('\n'.join(lines))
-        if lines != new_lines:
-            raise Exception("Incorrectly extracted traceback information")
+        if lines != new_lines or len(self.lines) == 0:
+            raise ParseException("Incorrectly extracted traceback information")
 
     def traceback_format(self):
         return [line.traceback_format() for line in self.lines]

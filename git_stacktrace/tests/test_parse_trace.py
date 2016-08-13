@@ -35,6 +35,11 @@ class TestParseStacktrace(base.TestCase):
                     expected,
                     str(parse_trace.Traceback(f.readlines())))
 
+    def test_exception(self):
+        self.assertRaises(parse_trace.ParseException, parse_trace.Traceback, "NOT A TRACEBACK")
+        with open('git_stacktrace/tests/examples/java.trace') as f:
+            self.assertRaises(parse_trace.ParseException, parse_trace.Traceback, f.readlines())
+
 
 class TestLine(base.TestCase):
     def test_line(self):
