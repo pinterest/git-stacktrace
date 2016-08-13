@@ -24,7 +24,7 @@ class TestApi(base.TestCase):
 
     def get_traceback(self):
         with open('git_stacktrace/tests/examples/python3.trace') as f:
-            traceback = api.Traceback(f.readlines())
+            traceback = api.parse_trace(f.readlines())
         return traceback
 
     def setup_mocks(self, mock_files, mock_files_touched):

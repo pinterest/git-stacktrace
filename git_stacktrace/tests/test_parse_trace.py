@@ -4,7 +4,7 @@ from git_stacktrace.tests import base
 from git_stacktrace import parse_trace
 
 
-class TestParseStacktrace(base.TestCase):
+class TestParsePythonStacktrace(base.TestCase):
     trace3_expected = [
             ('../common/utils/geo_utils.py', 68, 'get_ip_geo', 'return get_geo_db().record_by_addr(ip_address)'),
             ('/mnt/virtualenv_A/local/lib/python2.7/site-packages/pygeoip/__init__.py', 563,
@@ -16,7 +16,7 @@ class TestParseStacktrace(base.TestCase):
         # extract_python_traceback_from_file will raise an exception if it incorrectly parses a file
         for filename in glob.glob('git_stacktrace/tests/examples/python*.trace'):
             with open(filename) as f:
-                traceback = parse_trace.Traceback(f.readlines())
+                traceback = parse_trace.PythonTraceback(f.readlines())
                 if filename == 'git_stacktrace/tests/examples/python3.trace':
                     self.assertEqual(self.trace3_expected, traceback.traceback_format())
 
@@ -33,12 +33,12 @@ class TestParseStacktrace(base.TestCase):
         with open('git_stacktrace/tests/examples/python3.trace') as f:
             self.assertEqual(
                     expected,
-                    str(parse_trace.Traceback(f.readlines())))
+                    str(parse_trace.PythonTraceback(f.readlines())))
 
     def test_exception(self):
-        self.assertRaises(parse_trace.ParseException, parse_trace.Traceback, "NOT A TRACEBACK")
+        self.assertRaises(parse_trace.ParseException, parse_trace.PythonTraceback, "NOT A TRACEBACK")
         with open('git_stacktrace/tests/examples/java.trace') as f:
-            self.assertRaises(parse_trace.ParseException, parse_trace.Traceback, f.readlines())
+            self.assertRaises(parse_trace.ParseException, parse_trace.PythonTraceback, f.readlines())
 
 
 class TestLine(base.TestCase):
@@ -47,3 +47,10 @@ class TestLine(base.TestCase):
         line = parse_trace.Line(*line_data)
         line.git_filename = "file"
         self.assertEqual(line_data, line.traceback_format())
+
+
+class TestParseTrace(base.TestCase):
+    def test_parse_trace(self):
+        for filename in glob.glob('git_stacktrace/tests/examples/python*.trace'):
+            with open(filename) as f:
+                parse_trace.parse_trace(f.readlines())

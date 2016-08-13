@@ -2,9 +2,8 @@
 
 Currently only supports python stacktraces
 """
+import abc
 import traceback
-
-# TODO turn this into different classes for different languages
 
 
 class ParseException(Exception):
@@ -25,13 +24,27 @@ class Line(object):
 
 
 class Traceback(object):
-    """Parse Traceback string."""
+    __metaclass__ = abc.ABCMeta
 
     def __init__(self, blob):
         self.lines = None
-        self.extract_python_traceback(blob)
+        self.extract_traceback(blob)
 
-    def extract_python_traceback(self, blob):
+    @abc.abstractmethod
+    def extract_traceback(self, blob):
+        """Extract language specific traceback"""
+        return
+
+    @abc.abstractmethod
+    def __str__(self):
+        """format extracted traceback in same way as blob."""
+        return
+
+
+class PythonTraceback(Traceback):
+    """Parse Traceback string."""
+
+    def extract_traceback(self, blob):
         """Convert traceback string into a traceback.extract_tb format"""
         # remove empty lines
         if type(blob) == list:
@@ -81,3 +94,14 @@ class Traceback(object):
     def __str__(self):
         lines = self.traceback_format()
         return ''.join(traceback.format_list(lines))
+
+
+def parse_trace(traceback_string):
+    languages = [PythonTraceback, ]
+    for language in languages:
+        try:
+            return language(traceback_string)
+        except ParseException:
+            # Try next language
+            continue
+    raise ParseException("Unable to parse traceback")

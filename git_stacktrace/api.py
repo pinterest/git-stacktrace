@@ -5,7 +5,7 @@ python API to call git stacktrace.
 Example usage:
     from git_stacktrace import api
 
-    traceback = api.Traceback(traceback_string)
+    traceback = api.parse_trace(traceback_string)
     git_range = api.convert_since('1.day')
     results = api.lookup_stacktrace(traceback, git_range, fast=False)
     for r in results.get_sorted_results():
@@ -18,9 +18,8 @@ from git_stacktrace import git
 from git_stacktrace import result
 from git_stacktrace import parse_trace
 
-
-# So we can call api.Traceback
-Traceback = parse_trace.Traceback
+# So we can call api.parse_trace
+parse_trace = parse_trace.parse_trace
 
 
 def _longest_filename(matches):
