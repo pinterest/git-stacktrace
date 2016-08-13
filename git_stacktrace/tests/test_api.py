@@ -23,7 +23,7 @@ class TestApi(base.TestCase):
         self.assertEquals(expected, api.valid_range('hash1..hash2'))
 
     def get_traceback(self):
-        with open('git_stacktrace/tests/examples/trace3') as f:
+        with open('git_stacktrace/tests/examples/python3.trace') as f:
             traceback = api.Traceback(f.readlines())
         return traceback
 

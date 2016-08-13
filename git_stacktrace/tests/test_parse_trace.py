@@ -14,10 +14,10 @@ class TestParseStacktrace(base.TestCase):
 
     def test_extract_traceback_from_file(self):
         # extract_python_traceback_from_file will raise an exception if it incorrectly parses a file
-        for filename in glob.glob('git_stacktrace/tests/examples/trace*'):
+        for filename in glob.glob('git_stacktrace/tests/examples/python*.trace'):
             with open(filename) as f:
                 traceback = parse_trace.Traceback(f.readlines())
-                if filename == 'git_stacktrace/tests/examples/trace3':
+                if filename == 'git_stacktrace/tests/examples/python3.trace':
                     self.assertEqual(self.trace3_expected, traceback.traceback_format())
 
     def test_str(self):
@@ -30,7 +30,7 @@ class TestParseStacktrace(base.TestCase):
                 '  File "/mnt/virtualenv_A/local/lib/python2.7/site-packages/pygeoip/util.py", line 36, in ip2long\n'
                 '    return int(binascii.hexlify(socket.inet_pton(socket.AF_INET6, ip)), 16)\n')
 
-        with open('git_stacktrace/tests/examples/trace3') as f:
+        with open('git_stacktrace/tests/examples/python3.trace') as f:
             self.assertEqual(
                     expected,
                     str(parse_trace.Traceback(f.readlines())))
