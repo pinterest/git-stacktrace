@@ -42,7 +42,6 @@ def main():
     blob = sys.stdin.readlines()
     traceback = api.parse_trace(blob)
 
-    print "Traceback:"
     print traceback
 
     results = api.lookup_stacktrace(traceback, git_range, fast=args.fast)

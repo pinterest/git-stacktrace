@@ -30,6 +30,8 @@ class Traceback(object):
     __metaclass__ = abc.ABCMeta
 
     def __init__(self, blob):
+        self.header = ""
+        self.footer = ""
         self.lines = None
         self.extract_traceback(self.prep_blob(blob))
 
@@ -59,9 +61,12 @@ class Traceback(object):
         return
 
     @abc.abstractmethod
-    def __str__(self):
-        """format extracted traceback in same way as blob."""
+    def format_lines(self):
+        """format extracted traceback in same way as traceback."""
         return
+
+    def __str__(self):
+        return self.header + self.format_lines() + self.footer
 
     @abc.abstractmethod
     def file_match(self, trace_filename, git_files):
@@ -79,6 +84,9 @@ class PythonTraceback(Traceback):
         """Convert traceback string into a traceback.extract_tb format"""
         # TODO better logging if cannot read traceback
         # filter out traceback lines
+        self.header = lines[0] + '\n'
+        if len(lines[-1]) > 0 and not lines[-1].startswith(' '):
+            self.footer = lines[-1] + '\n'
         lines = [line.rstrip() for line in lines if line.startswith('  ')]
         # extract
         extracted = []
@@ -106,7 +114,7 @@ class PythonTraceback(Traceback):
     def traceback_format(self):
         return [line.traceback_format() for line in self.lines]
 
-    def __str__(self):
+    def format_lines(self):
         lines = self.traceback_format()
         return ''.join(traceback.format_list(lines))
 
@@ -118,6 +126,8 @@ class PythonTraceback(Traceback):
 class JavaTraceback(Traceback):
 
     def extract_traceback(self, lines):
+        if not lines[0].startswith('\t'):
+            self.header = lines[0] + '\n'
         lines = [line for line in lines if line.startswith('\t')]
         extracted = []
         for line in lines:
@@ -162,7 +172,7 @@ class JavaTraceback(Traceback):
             return "\tat %s.%s.%s(Native Method)\n" % (path, line.class_name, line.function_name)
         return "\tat %s.%s.%s(%s:%d)\n" % (path, line.class_name, line.function_name, filename, line.line_number)
 
-    def __str__(self):
+    def format_lines(self):
         result = ''
         for line in self.lines:
             result += self._format_line(line)

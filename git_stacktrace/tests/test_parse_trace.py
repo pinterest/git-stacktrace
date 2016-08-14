@@ -12,8 +12,8 @@ class TestParsePythonStacktrace(base.TestCase):
             ('/mnt/virtualenv_A/local/lib/python2.7/site-packages/pygeoip/util.py', 36, 'ip2long',
                 'return int(binascii.hexlify(socket.inet_pton(socket.AF_INET6, ip)), 16)')]
 
-    def get_trace(self):
-        with open('git_stacktrace/tests/examples/python3.trace') as f:
+    def get_trace(self, number=3):
+        with open('git_stacktrace/tests/examples/python%d.trace' % number) as f:
             trace = parse_trace.PythonTraceback(f.readlines())
         return trace
 
@@ -26,16 +26,17 @@ class TestParsePythonStacktrace(base.TestCase):
                     self.assertEqual(self.trace3_expected, traceback.traceback_format())
 
     def test_str(self):
-        expected = (
-                '  File "../common/utils/geo_utils.py", line 68, in get_ip_geo\n'
-                '    return get_geo_db().record_by_addr(ip_address)\n'
-                '  File "/mnt/virtualenv_A/local/lib/python2.7/site-packages/pygeoip/__init__.py", '
-                'line 563, in record_by_addr\n'
-                '    ipnum = util.ip2long(addr)\n'
-                '  File "/mnt/virtualenv_A/local/lib/python2.7/site-packages/pygeoip/util.py", line 36, in ip2long\n'
-                '    return int(binascii.hexlify(socket.inet_pton(socket.AF_INET6, ip)), 16)\n')
-
+        with open('git_stacktrace/tests/examples/python3.trace') as f:
+            expected = f.read()
         trace = self.get_trace()
+        self.assertEqual(expected, str(trace))
+        with open('git_stacktrace/tests/examples/python5.trace') as f:
+            expected = f.read()
+        trace = self.get_trace(number=5)
+        self.assertEqual(expected, str(trace))
+        with open('git_stacktrace/tests/examples/python6.trace') as f:
+            expected = f.read()
+        trace = self.get_trace(number=6)
         self.assertEqual(expected, str(trace))
 
     def test_exception(self):
@@ -57,12 +58,8 @@ class TestParseJavaStacktrace(base.TestCase):
         return trace
 
     def test_str(self):
-        expected = (
-                '\tat java.io.FileInputStream.open(Native Method)\n'
-                '\tat java.io.FileInputStream.(FileInputStream.java:106)\n'
-                '\tat com.devdaily.tests.ExceptionTest.(ExceptionTest.java:15)\n'
-                '\tat com.devdaily.tests.ExceptionTest.main(ExceptionTest.java:36)\n'
-                )
+        with open('git_stacktrace/tests/examples/java.trace') as f:
+            expected = f.read()
         trace = self.get_trace()
         self.assertEqual(expected, str(trace))
 

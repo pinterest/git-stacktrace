@@ -36,11 +36,12 @@ Example output::
 
 
     $ git stacktrace --since=1.day < trace
-    Traceback:
+    Traceback (most recent call last):
      File "webapp/framework/resource.py", line 72, in _call
        result = getattr(self, method_name)()
      File "webapp/resources/interests_resource.py", line 232, in get
        if self.options['from_navigate'] == "true":
+    KeyError
 
 
     commit da39a3ee5e6b4b0d3255bfef95601890afd80709
