@@ -34,7 +34,7 @@ def run_command_status(*argv, **kwargs):
 def run_command(*argv, **kwargs):
     (rc, output) = run_command_status(*argv, **kwargs)
     if rc != 0:
-        print rc, output
+        print argv, rc, output
         raise Exception("Something went wrong running the command %s %s" % (argv, kwargs))
     return output
 
@@ -68,7 +68,7 @@ def pickaxe(snippet, git_range, filename=None):
     """
     cmd = 'git', 'log', '-b', '--pretty=%H', '-S', snippet.decode('string_escape'), git_range
     if filename:
-        cmd = cmd + (filename,)
+        cmd = cmd + ('--', filename,)
     commits = run_command(*cmd).splitlines()
     commits = [(commit, line_removed(snippet, commit)) for commit in commits]
     # Couldn't find a good way to POSIX regex escape the code and use regex
