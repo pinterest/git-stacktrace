@@ -9,6 +9,13 @@ git-stacktrace looks for:
 * commits in given range that added/removed code present the stacktrace
 
 
+Supported Languages
+-------------------
+
+* Python
+* Java
+
+
 Development
 ------------
 
