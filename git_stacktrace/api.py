@@ -35,8 +35,9 @@ def _lookup_files(commit_files, git_files, traceback, results):
             git_file = _longest_filename(matches)
             for commit, file_list in commit_files.iteritems():
                 if git_file in file_list:
-                    line.git_filename = git_file
-                    results.get_result(commit).files.add(git_file)
+                    git_file = file_list[file_list.index(git_file)]
+                    line.git_filename = git_file.filename
+                    results.get_result(commit).add_file(git_file)
             if line.git_filename is None:
                 line.git_filename = _longest_filename(matches)
 

@@ -2,6 +2,7 @@ import mock
 
 from git_stacktrace.tests import base
 from git_stacktrace import api
+from git_stacktrace import git
 
 
 class TestApi(base.TestCase):
@@ -28,7 +29,7 @@ class TestApi(base.TestCase):
         return traceback
 
     def setup_mocks(self, mock_files, mock_files_touched):
-        mock_files_touched.return_value = {'hash2': ['common/utils/geo_utils.py']}
+        mock_files_touched.return_value = {'hash2': [git.GitFile('common/utils/geo_utils.py', 'M')]}
         mock_files.return_value = ['common/utils/geo_utils.py']
 
     @mock.patch('git_stacktrace.git.pickaxe')
