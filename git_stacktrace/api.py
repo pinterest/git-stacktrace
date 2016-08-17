@@ -37,7 +37,10 @@ def _lookup_files(commit_files, git_files, traceback, results):
                 if git_file in file_list:
                     git_file = file_list[file_list.index(git_file)]
                     line.git_filename = git_file.filename
-                    results.get_result(commit).add_file(git_file)
+                    line_number = None
+                    if git.line_match(commit, line):
+                        line_number = line.line_number
+                    results.get_result(commit).add_file(git_file, line_number)
             if line.git_filename is None:
                 line.git_filename = _longest_filename(matches)
 
@@ -80,8 +83,8 @@ def lookup_stacktrace(traceback, git_range, fast):
                 # If this fails, move on
                 continue
         for commit, line_removed in commits:
-            if line_removed:
+            if line_removed is True:
                 results.get_result(commit).lines_removed.add(line.code)
-            else:
+            if line_removed is False:
                 results.get_result(commit).lines_added.add(line.code)
     return results

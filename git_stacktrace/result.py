@@ -11,18 +11,24 @@ class Result(object):
         self.files_added = set()
         self.lines_added = set()
         self.lines_removed = set()
+        self._line_numbers_matched = 0
 
     @property
     def commit(self):
         return self._commit
 
-    def add_file(self, git_file):
-        if git_file.state in [git.GitFile.ADDED, git.GitFile.COPY_EDIT]:
-            self.files_added.add(git_file.filename)
-        elif git_file.state in [git.GitFile.DELETED]:
-            self.files_deleted.add(git_file.filename)
+    def add_file(self, git_file, line_number=None):
+        if line_number:
+            self._line_numbers_matched += 1
+            filename = git_file.filename + ":" + str(line_number)
         else:
-            self.files_modified.add(git_file.filename)
+            filename = git_file.filename
+        if git_file.state in [git.GitFile.ADDED, git.GitFile.COPY_EDIT]:
+            self.files_added.add(filename)
+        elif git_file.state in [git.GitFile.DELETED]:
+            self.files_deleted.add(filename)
+        else:
+            self.files_modified.add(filename)
 
     def __hash__(self):
         return hash(self.commit)
@@ -66,7 +72,7 @@ class Result(object):
 
     def rank(self):
         return (len(self.files_modified) + len(self.files_deleted)*2 + len(self.files_added)*3 +
-                len(self.lines_added)*3 + len(self.lines_removed)*2)
+                len(self.lines_added)*3 + len(self.lines_removed)*2 + self._line_numbers_matched*4)
 
 
 class Results(object):

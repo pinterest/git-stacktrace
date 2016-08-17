@@ -5,6 +5,7 @@ import sys
 import shlex
 import os
 
+import whatthepatch
 
 SHA1_REGEX = re.compile(r'\b[0-9a-f]{40}\b')
 
@@ -119,19 +120,32 @@ def line_removed(target_line, commit):
     None if target_line wasn't found at all (because not a full line etc.)
     """
     cmd = 'git', 'log', '-1', '--format=', '-p', str(commit)
-    lines = run_command(*cmd).splitlines()
-    for line in lines:
-        check = False
-        removed = False
-        if line.startswith('-'):
-            removed = True
-            check = True
-        elif line.startswith('+'):
-            check = True
-        if check and target_line == line[1:].strip():
-            return removed
+    diff = run_command(*cmd)
+    for diff in whatthepatch.parse_patch(diff):
+        for line in diff.changes:
+            if target_line in line[2]:
+                if line[0] is None:
+                    # Line added
+                    return False
+                elif line[1] is None:
+                    # Line removed
+                    return True
     # target_line matched part of a line instead of a full line
     return None
+
+
+def line_match(commit, traceback_line):
+    """Return true if line_number was added to filename in commit"""
+
+    cmd = 'git', 'log', '-1', '--format=', '-p', str(commit)
+    diff = run_command(*cmd)
+    for diff in whatthepatch.parse_patch(diff):
+        if diff.header.new_path == traceback_line.git_filename:
+            for line in diff.changes:
+                if line[0] is None:
+                    if line[1] == traceback_line.line_number:
+                        return True
+    return False
 
 
 def format_one_commit(commit):

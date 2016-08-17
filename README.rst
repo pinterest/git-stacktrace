@@ -57,6 +57,6 @@ Example output::
     Subject:     break interest resource
     Link:        https://example.com/D1000
     Files Modified:
-       - webapp/resources/interests_resource.py
+       - webapp/resources/interests_resource.py:232
     Lines Added:
        - "if self.options['from_navigate'] == "true":"
