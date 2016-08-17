@@ -16,7 +16,7 @@ class GitFile(object):
     MODIFIED = 'M'
     COPY_EDIT = 'C'
     RENAME_EDIT = 'R'
-    VALID = [ADDED, DELETED, MODIFIED, COPY_EDIT, RENAME_EDIT]
+    VALID = frozenset([ADDED, DELETED, MODIFIED, COPY_EDIT, RENAME_EDIT])
 
     def __init__(self, filename, state=None):
         self.filename = filename
@@ -28,7 +28,7 @@ class GitFile(object):
         return self.filename
 
     def __cmp__(self, other):
-        if type(other) == str or type(other) == unicode:
+        if isinstance(other, basestring):
             other_filename = other
         else:
             other_filename = other.filename

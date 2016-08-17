@@ -85,7 +85,7 @@ class PythonTraceback(Traceback):
         # TODO better logging if cannot read traceback
         # filter out traceback lines
         self.header = lines[0] + '\n'
-        if len(lines[-1]) > 0 and not lines[-1].startswith(' '):
+        if lines[-1] and not lines[-1].startswith(' '):
             self.footer = lines[-1] + '\n'
         lines = [line.rstrip() for line in lines if line.startswith('  ')]
         # extract
@@ -108,7 +108,7 @@ class PythonTraceback(Traceback):
         new_lines = traceback.format_list(self.traceback_format())
         new_lines = ('\n'.join([l.rstrip() for l in new_lines]))
         lines = ('\n'.join(lines))
-        if lines != new_lines or len(self.lines) == 0:
+        if lines != new_lines or not self.lines:
             raise ParseException("Incorrectly extracted traceback information")
 
     def traceback_format(self):
@@ -133,7 +133,7 @@ class JavaTraceback(Traceback):
         for line in lines:
             extracted.append(self._extract_line(line))
         self.lines = extracted
-        if len(self.lines) == 0:
+        if not self.lines:
             raise ParseException("Failed to parse stacktrace")
 
     def _extract_line(self, line_string):
@@ -173,10 +173,7 @@ class JavaTraceback(Traceback):
         return "\tat %s.%s.%s(%s:%d)\n" % (path, line.class_name, line.function_name, filename, line.line_number)
 
     def format_lines(self):
-        result = ''
-        for line in self.lines:
-            result += self._format_line(line)
-        return result
+        return ''.join(map(self._format_line, self.lines))
 
     def file_match(self, trace_filename, git_files):
         # git_filename is substring of trace_filename

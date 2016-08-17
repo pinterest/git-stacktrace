@@ -25,7 +25,7 @@ class Result(object):
             self.files_modified.add(git_file.filename)
 
     def __hash__(self):
-        return self.commit.__hash__()
+        return hash(self.commit)
 
     def __str__(self):
         result = ""
