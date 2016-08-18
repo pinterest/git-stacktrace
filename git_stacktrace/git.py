@@ -9,6 +9,37 @@ import os
 SHA1_REGEX = re.compile(r'\b[0-9a-f]{40}\b')
 
 
+class GitFile(object):
+    """Track filename and if file was added/removed or modified."""
+    ADDED = 'A'
+    DELETED = 'D'
+    MODIFIED = 'M'
+    COPY_EDIT = 'C'
+    RENAME_EDIT = 'R'
+    VALID = frozenset([ADDED, DELETED, MODIFIED, COPY_EDIT, RENAME_EDIT])
+
+    def __init__(self, filename, state=None):
+        self.filename = filename
+        if state not in GitFile.VALID:
+            raise Exception("Invalid git file state: %s" % state)
+        self.state = state
+
+    def __repr__(self):
+        return self.filename
+
+    def __cmp__(self, other):
+        if isinstance(other, basestring):
+            other_filename = other
+        else:
+            other_filename = other.filename
+        if self.filename == other_filename:
+            return 0
+        elif self.filename < other_filename:
+            return -1
+        else:
+            return 1
+
+
 def run_command_status(*argv, **kwargs):
     if len(argv) == 1:
         # for python2 compatibility with shlex
@@ -34,17 +65,17 @@ def run_command_status(*argv, **kwargs):
 def run_command(*argv, **kwargs):
     (rc, output) = run_command_status(*argv, **kwargs)
     if rc != 0:
-        print rc, output
+        print argv, rc, output
         raise Exception("Something went wrong running the command %s %s" % (argv, kwargs))
     return output
 
 
 def files_touched(git_range):
-    """Run git log --pretty="%H" --numstat git_range.
+    """Run git log --pretty="%H" --raw  git_range.
 
     Generate a dictionary of files modified by the commits in range
     """
-    cmd = 'git', 'log', '--pretty=%H', '--name-only', git_range
+    cmd = 'git', 'log', '--pretty=%H', '--raw', git_range
     data = run_command(*cmd)
     commits = collections.defaultdict(list)
     commit = None
@@ -52,7 +83,9 @@ def files_touched(git_range):
         if SHA1_REGEX.match(line):
             commit = line
         elif line.strip():
-            commits[commit].append(line)
+            filename = line.split('\t')[-1]
+            state = line[37]
+            commits[commit].append(GitFile(filename, state))
     return commits
 
 
@@ -68,7 +101,7 @@ def pickaxe(snippet, git_range, filename=None):
     """
     cmd = 'git', 'log', '-b', '--pretty=%H', '-S', snippet.decode('string_escape'), git_range
     if filename:
-        cmd = cmd + (filename,)
+        cmd = cmd + ('--', filename,)
     commits = run_command(*cmd).splitlines()
     commits = [(commit, line_removed(snippet, commit)) for commit in commits]
     # Couldn't find a good way to POSIX regex escape the code and use regex

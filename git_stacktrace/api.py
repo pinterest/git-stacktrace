@@ -5,7 +5,7 @@ python API to call git stacktrace.
 Example usage:
     from git_stacktrace import api
 
-    traceback = api.Traceback(traceback_string)
+    traceback = api.parse_trace(traceback_string)
     git_range = api.convert_since('1.day')
     results = api.lookup_stacktrace(traceback, git_range, fast=False)
     for r in results.get_sorted_results():
@@ -18,9 +18,8 @@ from git_stacktrace import git
 from git_stacktrace import result
 from git_stacktrace import parse_trace
 
-
-# So we can call api.Traceback
-Traceback = parse_trace.Traceback
+# So we can call api.parse_trace
+parse_trace = parse_trace.parse_trace
 
 
 def _longest_filename(matches):
@@ -31,13 +30,14 @@ def _longest_filename(matches):
 def _lookup_files(commit_files, git_files, traceback, results):
     """Populate results and line.git_filename."""
     for line in traceback.lines:
-        matches = [f for f in git_files if line.trace_filename.endswith(f)]
+        matches = traceback.file_match(line.trace_filename, git_files)
         if matches:
-            git_file = _longest_filename([f for f in git_files if line.trace_filename.endswith(f)])
+            git_file = _longest_filename(matches)
             for commit, file_list in commit_files.iteritems():
                 if git_file in file_list:
-                    line.git_filename = git_file
-                    results.get_result(commit).files.add(git_file)
+                    git_file = file_list[file_list.index(git_file)]
+                    line.git_filename = git_file.filename
+                    results.get_result(commit).add_file(git_file)
             if line.git_filename is None:
                 line.git_filename = _longest_filename(matches)
 

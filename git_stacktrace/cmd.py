@@ -40,9 +40,8 @@ def main():
     if not select.select([sys.stdin], [], [], 0.0)[0]:
         raise Exception("No input found in stdin")
     blob = sys.stdin.readlines()
-    traceback = api.Traceback(blob)
+    traceback = api.parse_trace(blob)
 
-    print "Traceback:"
     print traceback
 
     results = api.lookup_stacktrace(traceback, git_range, fast=args.fast)

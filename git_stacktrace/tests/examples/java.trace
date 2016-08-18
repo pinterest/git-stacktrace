@@ -1,0 +1,5 @@
+java.io.FileNotFoundException: foo (The system cannot find the file specified)
+	at java.io.FileInputStream.open(Native Method)
+	at java.io.FileInputStream.(FileInputStream.java:106)
+	at com.devdaily.tests.ExceptionTest.(ExceptionTest.java:15)
+	at com.devdaily.tests.ExceptionTest.main(ExceptionTest.java:36)
