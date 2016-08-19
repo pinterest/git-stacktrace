@@ -2,6 +2,7 @@ import mock
 
 from git_stacktrace.tests import base
 from git_stacktrace import git
+from git_stacktrace import parse_trace
 
 
 class TestGitFile(base.TestCase):
@@ -53,3 +54,28 @@ class TestGit(base.TestCase):
             ":100644 000000 1234567... 0000000... D	file5"])
         expected = {"1ca8dd2b178ef8f308849bac2b0eaecaf91abc70": ["file0", "file2", "file3", "file4 space/log", "file5"]}
         self.assertEqual(expected, git.files_touched("A..B"))
+
+    @mock.patch('git_stacktrace.git.run_command')
+    def test_line_match(self, mocked_command):
+        mocked_command.return_value = '\n'.join([
+            "diff --git a/test_api.py b/test_api.py",
+            "index 73e79d1..884b953 100644",
+            "--- a/test_api.py",
+            "+++ b/test_api.py",
+            "@@ -35,7 +35,9 @@ class TestApi(base.TestCase):",
+            "     @mock.patch('git_stacktrace.git.pickaxe')",
+            "     @mock.patch('git_stacktrace.git.files_touched')",
+            "     @mock.patch('git_stacktrace.git.files')",
+            "-    def test_lookup_stacktrace(self, mock_files, mock_files_touched, mock_pickaxe):",
+            "+    @mock.patch('git_stacktrace.git.line_match')",
+            "+    def test_lookup_stacktrace(self, mock_line_match, mock_files, mock_files_touched, mock_pickaxe):",
+            "+        mock_files_touched.return_value = True",
+            "         traceback = self.get_traceback()",
+            "         self.setup_mocks(mock_files, mock_files_touched)",
+        ])
+        filename = "test_api.py"
+        line = parse_trace.Line(filename, 38, None, None)
+        line.git_filename = filename
+        self.assertTrue(git.line_match("hash1", line))
+        line.line_number = 5
+        self.assertFalse(git.line_match("hash1", line))

@@ -17,10 +17,10 @@ class TestResult(base.TestCase):
 
     def test_files(self):
         commit1 = result.Result(self.commit_hash)
-        expected_files_modified = set(['file1'])
+        expected_files_modified = set(['file1:10', 'file1'])
         expected_files_added = set(['file2', 'file3'])
         expected_files_deleted = set(['file4'])
-        commit1.add_file(git.GitFile('file1', 'M'))
+        commit1.add_file(git.GitFile('file1', 'M'), line_number=10)
         commit1.add_file(git.GitFile('file1', 'M'))
         commit1.add_file(git.GitFile('file2', 'A'))
         commit1.add_file(git.GitFile('file3', 'C'))
@@ -56,9 +56,9 @@ class TestResult(base.TestCase):
         commit1.lines_removed.add('True')
         expected = ("custom\nLink:        url\nFiles Added:\n    - file2\nFiles Modified:\n    - "
                     "file1\nLines Added:\n    - \"pass\"\nLines Removed:\n    - \"True\"\n")
-        commit1.add_file(git.GitFile('file3', 'D'))
+        commit1.add_file(git.GitFile('file3', 'D'), line_number=11)
         expected = ("custom\nLink:        url\nFiles Added:\n    - file2\nFiles Modified:\n    - "
-                    "file1\nFiles Deleted:\n    - file3\nLines Added:\n    - "
+                    "file1\nFiles Deleted:\n    - file3:11\nLines Added:\n    - "
                     "\"pass\"\nLines Removed:\n    - \"True\"\n")
         self.assertEqual(expected, str(commit1))
 
@@ -85,19 +85,21 @@ class TestResult(base.TestCase):
         self.assertEqual(4, commit1.rank())
         commit1.lines_added.add('pass')
         self.assertEqual(7, commit1.rank())
+        commit1.add_file(git.GitFile('file3', 'M'), line_number=12)
+        self.assertEqual(12, commit1.rank())
 
     @mock.patch('git_stacktrace.git.get_commit_info')
     def test_dict(self, mocked_git_info):
         mocked_git_info.return_value = "custom", "full", "url"
         commit1 = result.Result(self.commit_hash)
         commit1.add_file(git.GitFile('file1', 'M'))
-        commit1.add_file(git.GitFile('file2', 'A'))
+        commit1.add_file(git.GitFile('file2', 'A'), line_number=12)
         commit1.add_file(git.GitFile('file3', 'D'))
         commit1.lines_removed.add('True')
         commit1.lines_added.add('pass')
         expected = {
                     'commit': 'hash1',
-                    'files_added': ['file2'],
+                    'files_added': ['file2:12'],
                     'files_modified': ['file1'],
                     'files_deleted': ['file3'],
                     'full': 'full',

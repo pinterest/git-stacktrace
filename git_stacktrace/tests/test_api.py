@@ -35,17 +35,36 @@ class TestApi(base.TestCase):
     @mock.patch('git_stacktrace.git.pickaxe')
     @mock.patch('git_stacktrace.git.files_touched')
     @mock.patch('git_stacktrace.git.files')
-    def test_lookup_stacktrace(self, mock_files, mock_files_touched, mock_pickaxe):
+    @mock.patch('git_stacktrace.git.line_match')
+    def test_lookup_stacktrace(self, mock_line_match, mock_files, mock_files_touched, mock_pickaxe):
+        mock_files_touched.return_value = True
+        mock_line_match.return_value = False
         traceback = self.get_traceback()
         self.setup_mocks(mock_files, mock_files_touched)
-        api.lookup_stacktrace(traceback, "hash1..hash3", fast=False)
+        self.assertEqual(0, api.lookup_stacktrace(traceback, "hash1..hash3", fast=False).
+                         get_sorted_results()[0]._line_numbers_matched)
         self.assertEqual(3, mock_pickaxe.call_count)
 
     @mock.patch('git_stacktrace.git.pickaxe')
     @mock.patch('git_stacktrace.git.files_touched')
     @mock.patch('git_stacktrace.git.files')
-    def test_lookup_stacktrace_fast(self, mock_files, mock_files_touched, mock_pickaxe):
+    @mock.patch('git_stacktrace.git.line_match')
+    def test_lookup_stacktrace_fast(self, mock_line_match, mock_files, mock_files_touched, mock_pickaxe):
+        mock_files_touched.return_value = True
         traceback = self.get_traceback()
         self.setup_mocks(mock_files, mock_files_touched)
         api.lookup_stacktrace(traceback, "hash1..hash3", fast=True)
         self.assertEqual(1, mock_pickaxe.call_count)
+
+    @mock.patch('git_stacktrace.git.pickaxe')
+    @mock.patch('git_stacktrace.git.files_touched')
+    @mock.patch('git_stacktrace.git.files')
+    @mock.patch('git_stacktrace.git.line_match')
+    def test_lookup_stacktrace_line_match(self, mock_line_match, mock_files, mock_files_touched, mock_pickaxe):
+        mock_files_touched.return_value = True
+        mock_line_match.return_value = True
+        traceback = self.get_traceback()
+        self.setup_mocks(mock_files, mock_files_touched)
+        self.assertEqual(1, api.lookup_stacktrace(traceback, "hash1..hash3", fast=False).
+                         get_sorted_results()[0]._line_numbers_matched)
+        self.assertEqual(3, mock_pickaxe.call_count)
