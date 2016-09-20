@@ -9,22 +9,22 @@ from git_stacktrace import api
 
 def main():
     usage = "git stacktrace [<options>] [<RANGE>] < stacktrace from stdin"
-    description = "Lookup commits related to a given stacktrace"
+    description = "Lookup commits related to a given stacktrace."
     parser = argparse.ArgumentParser(usage=usage, description=description)
     range_group = parser.add_mutually_exclusive_group()
     range_group.add_argument('--since', metavar="<date1>", help='show commits '
-                             'more recent then a specific date (from git-log)')
+                             'more recent than a specific date (from git-log)')
     range_group.add_argument('range', nargs='?', help='git commit range to use')
     parser.add_argument('-f', '--fast', action="store_true", help='Speed things up by not running '
-                        'pickaxe if cannot find the file')
-    parser.add_argument('-p', '--path', nargs='?', help='Git path, if using --since, use this to specify which branch '
-                        'to run on.')
+                        'pickaxe if the file for a line of code cannot be found')
+    parser.add_argument('-b', '--branch', nargs='?', help='Git branch. If using --since, use this to '
+                        'specify which branch to run since on. Runs on current branch by default')
     parser.add_argument('--version', action="version",
                         version='%s version %s' % (os.path.split(sys.argv[0])[-1], git_stacktrace.__version__))
     args = parser.parse_args()
 
     if args.since:
-        git_range = api.convert_since(args.since, path=args.path)
+        git_range = api.convert_since(args.since, branch=args.branch)
         print >> sys.stderr, "commit range: %s" % git_range
     else:
         if args.range is None:
