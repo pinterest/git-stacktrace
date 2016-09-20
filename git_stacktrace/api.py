@@ -45,13 +45,13 @@ def _lookup_files(commit_files, git_files, traceback, results):
                 line.git_filename = _longest_filename(matches)
 
 
-def convert_since(since, path=None):
+def convert_since(since, branch=None):
     """Convert the git since format into a git range
 
     since -- git formatted since value such as '1,day'
-    path -- git path, such as 'origin/master'
+    branch -- git branch, such as 'origin/master'
     """
-    return git.convert_since(since, path=path)
+    return git.convert_since(since, branch=branch)
 
 
 def valid_range(git_range):
