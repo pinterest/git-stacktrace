@@ -51,6 +51,7 @@ class TestGit(base.TestCase):
             ":100644 100644 abcd123... 1234567... C68	file1	file2",
             ":100644 100644 abcd123... 1234567... R86	file1	file3",
             ":000000 100644 0000000... 1234567... A	file4 space/log",
+            ":100644 100644 f9731ae1d4... 6dc2860... M       test/file"
             ":100644 000000 1234567... 0000000... D	file5"])
         expected = {"1ca8dd2b178ef8f308849bac2b0eaecaf91abc70": ["file0", "file2", "file3", "file4 space/log", "file5"]}
         self.assertEqual(expected, git.files_touched("A..B"))
