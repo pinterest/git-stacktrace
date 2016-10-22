@@ -84,8 +84,9 @@ def files_touched(git_range):
         if SHA1_REGEX.match(line):
             commit = line
         elif line.strip():
-            filename = line.split('\t')[-1]
-            state = line[37]
+            split_line = line.split('\t')
+            filename = split_line[-1]
+            state = split_line[0].split(' ')[-1][0]
             commits[commit].append(GitFile(filename, state))
     return commits
 
