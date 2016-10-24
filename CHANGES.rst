@@ -1,6 +1,12 @@
 CHANGES
 =======
 
+0.6.0
+-----
+
+* Support arbitrary sized abbreviated hashes
+* Clarify CLI help message
+
 0.5.0
 -----
 
