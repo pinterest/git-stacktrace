@@ -33,7 +33,7 @@ def _lookup_files(commit_files, git_files, traceback, results):
         matches = traceback.file_match(line.trace_filename, git_files)
         if matches:
             git_file = _longest_filename(matches)
-            for commit, file_list in commit_files.iteritems():
+            for commit, file_list in commit_files.items():
                 if git_file in file_list:
                     git_file = file_list[file_list.index(git_file)]
                     line.git_filename = git_file.filename

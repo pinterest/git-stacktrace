@@ -1,3 +1,5 @@
+from __future__ import print_function
+
 import collections
 import re
 import subprocess
@@ -5,6 +7,7 @@ import sys
 import shlex
 import os
 
+import six
 import whatthepatch
 
 SHA1_REGEX = re.compile(r'\b[0-9a-f]{40}\b')
@@ -28,17 +31,12 @@ class GitFile(object):
     def __repr__(self):
         return self.filename
 
-    def __cmp__(self, other):
-        if isinstance(other, basestring):
+    def __eq__(self, other):
+        if isinstance(other, six.string_types):
             other_filename = other
         else:
             other_filename = other.filename
-        if self.filename == other_filename:
-            return 0
-        elif self.filename < other_filename:
-            return -1
-        else:
-            return 1
+        return self.filename == other_filename
 
 
 def run_command_status(*argv, **kwargs):
@@ -66,7 +64,7 @@ def run_command_status(*argv, **kwargs):
 def run_command(*argv, **kwargs):
     (rc, output) = run_command_status(*argv, **kwargs)
     if rc != 0:
-        print argv, rc, output
+        print(argv, rc, output)
         raise Exception("Something went wrong running the command %s %s" % (argv, kwargs))
     return output
 
