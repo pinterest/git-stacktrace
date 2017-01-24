@@ -1,7 +1,8 @@
 sudo: false
 language: python
 python:
-    2.7
+  - "2.7"
+  - "3.6"
 cache: pip
 install: pip install tox-travis
 script: tox

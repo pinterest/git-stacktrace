@@ -11,17 +11,17 @@ class TestApi(base.TestCase):
     def test_convert_since(self, mocked_command):
         expected = "HASH1..HASH2"
         mocked_command.return_value = expected
-        self.assertEquals(expected, api.convert_since('1.day'))
+        self.assertEqual(expected, api.convert_since('1.day'))
 
     @mock.patch('git_stacktrace.git.valid_range')
     def test_valid_range(self, mocked_command):
         expected = True
         mocked_command.return_value = expected
-        self.assertEquals(expected, api.valid_range('hash1..hash2'))
+        self.assertEqual(expected, api.valid_range('hash1..hash2'))
 
         expected = False
         mocked_command.return_value = expected
-        self.assertEquals(expected, api.valid_range('hash1..hash2'))
+        self.assertEqual(expected, api.valid_range('hash1..hash2'))
 
     def get_traceback(self):
         with open('git_stacktrace/tests/examples/python3.trace') as f:

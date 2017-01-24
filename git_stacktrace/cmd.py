@@ -1,3 +1,5 @@
+from __future__ import print_function
+
 import argparse
 import os
 import select
@@ -25,16 +27,16 @@ def main():
 
     if args.since:
         git_range = api.convert_since(args.since, branch=args.branch)
-        print >> sys.stderr, "commit range: %s" % git_range
+        print("commit range: %s" % git_range, file=sys.stderr)
     else:
         if args.range is None:
-            print "Error: Missing range and since, must use one\n"
+            print("Error: Missing range and since, must use one\n")
             parser.print_help()
             sys.exit(1)
         git_range = args.range
 
     if not api.valid_range(git_range):
-        print "Found no commits in '%s'" % git_range
+        print("Found no commits in '%s'" % git_range)
         sys.exit(1)
 
     if not select.select([sys.stdin], [], [], 0.0)[0]:
@@ -42,16 +44,17 @@ def main():
     blob = sys.stdin.readlines()
     traceback = api.parse_trace(blob)
 
-    print traceback
+    print(traceback)
 
     results = api.lookup_stacktrace(traceback, git_range, fast=args.fast)
 
     for r in results.get_sorted_results():
-        print ""
-        print r
+        print("")
+        print(r)
 
     if len(results.get_sorted_results()) == 0:
-        print "No matches found"
+        print("No matches found")
+
 
 if __name__ == "__main__":
     main()

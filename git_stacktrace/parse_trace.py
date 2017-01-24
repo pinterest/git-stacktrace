@@ -2,9 +2,13 @@
 
 Currently only supports python stacktraces
 """
+from __future__ import print_function
+
 import abc
 import re
 import traceback
+
+import six
 
 
 class ParseException(Exception):
@@ -26,8 +30,8 @@ class Line(object):
         return (self.trace_filename, self.line_number, self.function_name, self.code)
 
 
+@six.add_metaclass(abc.ABCMeta)
 class Traceback(object):
-    __metaclass__ = abc.ABCMeta
 
     def __init__(self, blob):
         self.header = ""
@@ -43,7 +47,7 @@ class Traceback(object):
             if len(blob) == 1:
                 blob = blob[0].replace('\\n', '\n').split('\n')
         # Split by line
-        if type(blob) == str or type(blob) == unicode:
+        if type(blob) == str or type(blob) == six.text_type:
             lines = blob.split('\n')
         elif type(blob) == list:
             if len(blob) == 1:
@@ -51,7 +55,7 @@ class Traceback(object):
             else:
                 lines = [line.rstrip() for line in blob]
         else:
-            print blob
+            print(blob)
             raise ParseException("Unknown input format")
         return lines
 
@@ -94,7 +98,7 @@ class PythonTraceback(Traceback):
             if i % 2 == 0:
                 words = line.split(', ')
                 if not (words[0].startswith('  File "') and words[1].startswith('line ') and words[2].startswith('in')):
-                    print line
+                    print(line)
                     raise ParseException("Something went wrong parsing stacktrace input.")
                 f = words[0].split('"')[1].strip()
                 line_number = int(words[1].split(' ')[1])
