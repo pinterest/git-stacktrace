@@ -208,8 +208,106 @@ class JavaTraceback(Traceback):
         return [f for f in git_files if f.endswith(trace_filename)]
 
 
+class ObjectiveCTraceback(Traceback):
+    # TODO - Is Objective-C really correct here? Wouldn't this work for Swift
+    # as well. Maybe it's more accurate to say this is a "Traceback for iOS
+    # crash reports?
+    # Crash Report format spec:
+    # https://developer.apple.com/library/content/technotes/tn2151/_index.html#//apple_ref/doc/uid/DTS40008184-CH1-ANALYZING_CRASH_REPORTS
+
+    def _parse_to_new_line(self, lines):
+        # lines -> (lines until '', remaining lines)
+        end_of_header_idx = lines.index('')
+        return (lines[:end_of_header_idx], lines[end_of_header_idx:])
+
+    def extract_traceback(self, lines):
+        """Extract language specific traceback"""
+        self.header = []
+        crashed_thread_trace = []
+        if "Incident Identifier" in lines[0]:
+            # parse apple crash report format
+            # parse header
+            thread_start_index = lines.index("Thread 0 name:")
+            self.header = ''.join(lines[:thread_start_index])
+            lines = lines[thread_start_index:]
+            # parse the trace of the crashed thread.
+            for i, l in enumerate(lines):
+                if l.startswith("Thread") and l.strip().endswith('Crashed:'):
+                    crashed_thread_idx = i
+                    break
+            for idx, line in enumerate(lines[crashed_thread_idx + 1:]):
+                if line.startswith(str(idx)):
+                    crashed_thread_trace.append(line)
+                else:
+                    break
+
+            print(crashed_thread_trace)
+        elif "Crashlytics" in lines[0]:
+            pass  # TODO - parse crashlytics
+        crashed_thread_trace = [l.strip() for l in crashed_thread_trace]
+        extracted = []
+        for line in crashed_thread_trace:
+            extracted.append(self._extract_line(line))
+
+        self.lines = extracted
+
+        if not crashed_thread_trace:
+            raise ParseException("Failed to parse stacktrace")
+
+        return
+
+    def _scan_line_to_char(self, line, character):
+        # line -> (scanned line, remaining string)
+        character_idx = line.find(character)
+        if character_idx == -1:
+            return line, ""
+        else:
+            return line[:character_idx].strip(), line[character_idx:]
+
+    def _extract_line(self, line):
+        """
+        0   libsystem_kernel.dylib            0x000000018285b014 __pthread_kill + 8
+        1   libsystem_pthread.dylib           0x0000000182923450 pthread_kill + 112 (pthread.c:1366)
+        """
+        # 0, 1, 2, ...
+        frame_number, line = self._scan_line_to_char(line, " ")
+        # QuartzCore, Pinterest, CoreFoundation, etc.
+        module, line = self._scan_line_to_char(line, "0x")
+        # Memory Address
+        memory_address, line = self._scan_line_to_char(line, " ")
+        # Function Call
+        file_components_loc = line.rfind("(")
+
+        if file_components_loc == -1:
+            function_call, line = line, ""
+        else:
+            function_call, line = line[:file_components_loc].strip(), line[file_components_loc:]
+
+        # Strip the memory offset information from the function signature
+        function_call = function_call.split("+")[0].strip()
+        file_components = line.replace("(", "").replace(")", "").split(":")
+        if len(file_components) == 2:
+            filename, line_number = file_components[0], int(file_components[1])
+        else:
+            filename, line_number = None, None
+        native_method = "Pinterest" not in module
+        class_name = self._scan_line_to_char(function_call, " ")[0].replace("[", "").replace("-", "").replace("+", "")
+        return Line(filename, line_number, function_call, None,
+                    class_name=class_name, native_method=native_method)
+
+    def _format_line(self, line):
+        return "\tat %s : (%s:%s)" % (line.function_name, line.trace_filename, line.line_number)
+
+    def format_lines(self):
+        return ''.join(map(self._format_line, self.lines))
+
+    def file_match(self, trace_filename, git_files):
+        # git_filename is substring of trace_filename
+        return [f for f in git_files if f.endswith(trace_filename)]
+
+
 def parse_trace(traceback_string):
-    languages = [PythonTraceback, JavaTraceback]
+    languages = [PythonTraceback, JavaTraceback, ObjectiveCTraceback]
     for language in languages:
         try:
             return language(traceback_string)

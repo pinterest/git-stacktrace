@@ -88,6 +88,26 @@ class TestParseJavaStacktrace(base.TestCase):
                          ['src/main/java/com/devdaily/tests/Fake.java']))
 
 
+class TestParseObjectiveCStacktrace(base.TestCase):
+    def get_trace(self):
+        with open('git_stacktrace/tests/examples/ios_crash.trace') as f:
+            trace = parse_trace.ObjectiveCTraceback(f.readlines())
+        return trace
+
+    def test_extract_traceback(self):
+        # 0   libsystem_kernel.dylib            0x000000018285b014 __pthread_kill + 8
+        # 1   libsystem_pthread.dylib           0x0000000182923450 pthread_kill + 112 (pthread.c:1366)
+        # 2   libsystem_c.dylib                 0x00000001827cf49c __abort + 144 (abort.c:128)
+        trace = self.get_trace()
+        self.assertTrue(len(trace.lines) > 0)
+        self.assertEqual(None, trace.lines[0].trace_filename)
+        self.assertEqual("pthread.c", trace.lines[1].trace_filename)
+        self.assertEqual("NSString.m", trace.lines[7].trace_filename)
+        self.assertEqual(21, trace.lines[12].line_number)
+        self.assertEqual("NSDictionary+PINNetworkingAdditions.m", trace.lines[12].trace_filename)
+        self.assertEqual("-[NSDictionary(PINNetworkingAdditions) queryStringValue]", trace.lines[12].function_name)
+
+
 class TestLine(base.TestCase):
     def test_line(self):
         line_data = ("./file", 1, 'foo', 'pass')
