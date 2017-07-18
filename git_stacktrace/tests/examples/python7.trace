@@ -1,0 +1,28 @@
+ValueError: invalid literal for int() with base 10: 'None'
+  File "flask/app.py", line 1982, in wsgi_app
+    response = self.full_dispatch_request()
+  File "flask/app.py", line 1614, in full_dispatch_request
+    rv = self.handle_user_exception(e)
+  File "flask_cors/extension.py", line 161, in wrapped_function
+    return cors_after_request(app.make_response(f(*args, **kwargs)))
+  File "flask/app.py", line 1517, in handle_user_exception
+    reraise(exc_type, exc_value, tb)
+  File "flask/_compat.py", line 33, in reraise
+    raise value
+  File "flask/app.py", line 1612, in full_dispatch_request
+    rv = self.dispatch_request()
+  File "flask/app.py", line 1598, in dispatch_request
+    return self.view_functions[rule.endpoint](**req.view_args)
+  File "<decorator-gen-39>", line 2, in ci
+  File "geetest_client.py", line 209, in captcha_counter_decorator
+    return func(*args, **kwargs)
+  File "company.py", line 305, in ci
+    company = get_company_info(company_id)
+  File "company.py", line 129, in get_company_info
+    return get_company_info_from_es(company_id) or get_company_info_from_element(company_id)
+  File "company.py", line 144, in get_company_info_from_es
+    annuals = choose_and_prettify_annual(company_id, result.get('extra', {}).get('类型', ''))
+  File "company.py", line 174, in choose_and_prettify_annual
+    result = prettify(annuals, is_llc=is_llc, show_all=show_all)
+  File "prettify/annual.py", line 45, in prettify
+    year = int(annual.get('year') or 0)

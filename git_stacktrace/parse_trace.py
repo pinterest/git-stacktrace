@@ -88,6 +88,8 @@ class Traceback(object):
 class PythonTraceback(Traceback):
     """Parse Traceback string."""
 
+    FILE_LINE_START = '  File "'
+
     def extract_traceback(self, lines):
         """Convert traceback string into a traceback.extract_tb format"""
         # filter out traceback lines
@@ -97,9 +99,13 @@ class PythonTraceback(Traceback):
         lines = [line.rstrip() for line in lines if line.startswith('  ')]
         # extract
         extracted = []
+        code_line = False
         for i, line in enumerate(lines):
-            if i % 2 == 0:
-                words = line.split(', ')
+            if code_line:
+                code_line = False
+                continue
+            words = line.split(', ')
+            if words[0].startswith(self.FILE_LINE_START):
                 if not (words[0].startswith('  File "') and words[1].startswith('line ') and words[2].startswith('in')):
                     message = 'Something went wrong parsing stacktrace input.'
                     log.debug("%s - '%s'", message, line)
@@ -107,8 +113,15 @@ class PythonTraceback(Traceback):
                 f = words[0].split('"')[1].strip()
                 line_number = int(words[1].split(' ')[1])
                 function_name = ' '.join(words[2].split(' ')[1:]).strip()
+                if lines[i+1].startswith(self.FILE_LINE_START):
+                    # Not all lines have code in the traceback
+                    code = None
+                else:
+                    code_line = True
+                    code = str(lines[i+1].strip())
+
                 try:
-                    extracted.append(Line(f, line_number, function_name, str(lines[i+1].strip())))
+                    extracted.append(Line(filename=f, line_number=line_number, function_name=function_name, code=code))
                 except IndexError:
                     raise ParseException("Incorrectly extracted traceback information")
         self.lines = extracted
