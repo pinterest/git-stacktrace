@@ -1,6 +1,12 @@
 CHANGES
 =======
 
+0.7.1
+-----
+
+* Fix python traceback parsing where code is missing (https://github.com/pinterest/git-stacktrace/issues/10)
+* Add --debug flag
+
 0.7.0
 -----
 
