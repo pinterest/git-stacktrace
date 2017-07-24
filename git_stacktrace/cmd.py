@@ -1,6 +1,7 @@
 from __future__ import print_function
 
 import argparse
+import logging
 import os
 import select
 import sys
@@ -23,7 +24,12 @@ def main():
                         'specify which branch to run since on. Runs on current branch by default')
     parser.add_argument('--version', action="version",
                         version='%s version %s' % (os.path.split(sys.argv[0])[-1], git_stacktrace.__version__))
+    parser.add_argument('-d', '--debug', action='store_true', help='Enable debug logging')
     args = parser.parse_args()
+
+    logging.basicConfig(format='%(name)s:%(funcName)s:%(lineno)s: %(message)s')
+    if args.debug:
+        logging.getLogger().setLevel(logging.DEBUG)
 
     if args.since:
         git_range = api.convert_since(args.since, branch=args.branch)

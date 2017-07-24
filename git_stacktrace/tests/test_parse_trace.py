@@ -100,4 +100,7 @@ class TestParseTrace(base.TestCase):
     def test_parse_trace(self):
         for filename in glob.glob('git_stacktrace/tests/examples/*.trace'):
             with open(filename) as f:
-                parse_trace.parse_trace(f.readlines())
+                try:
+                    parse_trace.parse_trace(f.readlines())
+                except Exception:
+                    self.fail("Failed to parse '%s'" % filename)

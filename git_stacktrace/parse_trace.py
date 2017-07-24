@@ -5,10 +5,13 @@ Currently only supports python stacktraces
 from __future__ import print_function
 
 import abc
+import logging
 import re
 import traceback
 
 import six
+
+log = logging.getLogger(__name__)
 
 
 class ParseException(Exception):
@@ -55,8 +58,9 @@ class Traceback(object):
             else:
                 lines = [line.rstrip() for line in blob]
         else:
-            print(blob)
-            raise ParseException("Unknown input format")
+            message = "Unknown input format"
+            log.debug("%s - '%s", message, blob)
+            raise ParseException(message)
         return lines
 
     @abc.abstractmethod
@@ -84,9 +88,10 @@ class Traceback(object):
 class PythonTraceback(Traceback):
     """Parse Traceback string."""
 
+    FILE_LINE_START = '  File "'
+
     def extract_traceback(self, lines):
         """Convert traceback string into a traceback.extract_tb format"""
-        # TODO better logging if cannot read traceback
         # filter out traceback lines
         self.header = lines[0] + '\n'
         if lines[-1] and not lines[-1].startswith(' '):
@@ -94,17 +99,29 @@ class PythonTraceback(Traceback):
         lines = [line.rstrip() for line in lines if line.startswith('  ')]
         # extract
         extracted = []
+        code_line = False
         for i, line in enumerate(lines):
-            if i % 2 == 0:
-                words = line.split(', ')
+            if code_line:
+                code_line = False
+                continue
+            words = line.split(', ')
+            if words[0].startswith(self.FILE_LINE_START):
                 if not (words[0].startswith('  File "') and words[1].startswith('line ') and words[2].startswith('in')):
-                    print(line)
-                    raise ParseException("Something went wrong parsing stacktrace input.")
+                    message = 'Something went wrong parsing stacktrace input.'
+                    log.debug("%s - '%s'", message, line)
+                    raise ParseException(message)
                 f = words[0].split('"')[1].strip()
                 line_number = int(words[1].split(' ')[1])
                 function_name = ' '.join(words[2].split(' ')[1:]).strip()
+                if lines[i+1].startswith(self.FILE_LINE_START):
+                    # Not all lines have code in the traceback
+                    code = None
+                else:
+                    code_line = True
+                    code = str(lines[i+1].strip())
+
                 try:
-                    extracted.append(Line(f, line_number, function_name, str(lines[i+1].strip())))
+                    extracted.append(Line(filename=f, line_number=line_number, function_name=function_name, code=code))
                 except IndexError:
                     raise ParseException("Incorrectly extracted traceback information")
         self.lines = extracted
@@ -113,7 +130,9 @@ class PythonTraceback(Traceback):
         new_lines = ('\n'.join([l.rstrip() for l in new_lines]))
         lines = ('\n'.join(lines))
         if lines != new_lines or not self.lines:
-            raise ParseException("Incorrectly extracted traceback information")
+            message = "Incorrectly extracted traceback information"
+            logging.debug("%s: original != parsed\noriginal:\n%s\nparsed:\n%s", message, lines, new_lines)
+            raise ParseException(message)
 
     def traceback_format(self):
         return [line.traceback_format() for line in self.lines]
@@ -190,6 +209,7 @@ def parse_trace(traceback_string):
         try:
             return language(traceback_string)
         except ParseException:
+            log.debug("Failed to parse as %s", language)
             # Try next language
             continue
     raise ParseException("Unable to parse traceback")
