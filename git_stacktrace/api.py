@@ -2,7 +2,8 @@
 python API to call git stacktrace.
 
 
-Example usage:
+Example usage::
+
     from git_stacktrace import api
 
     traceback = api.parse_trace(traceback_string)
@@ -48,8 +49,12 @@ def _lookup_files(commit_files, git_files, traceback, results):
 def convert_since(since, branch=None):
     """Convert the git since format into a git range
 
-    since -- git formatted since value such as '1,day'
-    branch -- git branch, such as 'origin/master'
+    :param since: git formatted since value such as '1,day'
+    :type since: str
+    :param branch: git branch, such as 'origin/master'
+    :type branch: str
+    :returns: commit range, such as 'ab9f71a..c04140'
+    :rtype: str
     """
     return git.convert_since(since, branch=branch)
 
@@ -58,6 +63,10 @@ def valid_range(git_range):
     """Make sure there are commits in the range
 
     Generate a dictionary of files modified by the commits in range
+
+    :param git_range: range of commits, such as 'ab9f71a..c04140'
+    :type git_range: str
+    :rtype: bool
     """
     return git.valid_range(git_range)
 
@@ -65,9 +74,17 @@ def valid_range(git_range):
 def lookup_stacktrace(traceback, git_range, fast):
     """Lookup to see what commits in git_range could have caused the stacktrace.
 
-    If fast is True, don't run pickaxe if cannot find the file in git.
+    Pass in a stacktrace object and returns a results object.
 
-    Pass in a stacktrace object and returns a results object."""
+    :param traceback: Traceback object
+    :type traceback: git_stacktrace.parse_trace.Traceback
+    :param git_range: git commit range
+    :type git_range: str
+    :param fast: If True, don't run pickaxe if cannot find the file in git.
+    :type fast: bool
+    :returns: results
+    :rtype: git_stacktrace.result.Results
+    """
     results = result.Results()
 
     commit_files = git.files_touched(git_range)

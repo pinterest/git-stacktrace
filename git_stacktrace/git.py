@@ -179,7 +179,7 @@ def get_commit_info(commit, color=True):
 def valid_range(git_range):
     """Make sure there are commits in the range
 
-    Generate a dictionary of files modified by the commits in range
+    Returns True or False
     """
     cmd = 'git', 'log', '--oneline', git_range
     data = run_command(*cmd)
