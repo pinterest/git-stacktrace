@@ -42,7 +42,7 @@ class GitFile(object):
 def run_command_status(*argv, **kwargs):
     if len(argv) == 1:
         # for python2 compatibility with shlex
-        if sys.version_info < (3,) and isinstance(argv[0], unicode):
+        if sys.version_info < (3,) and isinstance(argv[0], six.text_type):
             argv = shlex.split(argv[0].encode('utf-8'))
         else:
             argv = shlex.split(str(argv[0]))
