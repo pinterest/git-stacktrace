@@ -42,7 +42,7 @@ class GitFile(object):
 def run_command_status(*argv, **kwargs):
     if len(argv) == 1:
         # for python2 compatibility with shlex
-        if sys.version_info < (3,) and isinstance(argv[0], unicode):
+        if sys.version_info < (3,) and isinstance(argv[0], six.text_type):
             argv = shlex.split(argv[0].encode('utf-8'))
         else:
             argv = shlex.split(str(argv[0]))
@@ -179,7 +179,7 @@ def get_commit_info(commit, color=True):
 def valid_range(git_range):
     """Make sure there are commits in the range
 
-    Generate a dictionary of files modified by the commits in range
+    Returns True or False
     """
     cmd = 'git', 'log', '--oneline', git_range
     data = run_command(*cmd)
