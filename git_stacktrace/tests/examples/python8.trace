@@ -1,0 +1,5 @@
+Traceback (most recent call last):
+  File "foo.py", line 2, in <module>
+    x()
+  File "<string>", line 1, in <lambda>
+TypeError: int() argument must be a string or a number, not 'NoneType'
