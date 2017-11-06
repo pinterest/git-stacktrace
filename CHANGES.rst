@@ -1,6 +1,11 @@
 Change Log
 ==========
 
+0.7.2
+-----
+
+* Fix python traceback parsing with no code on last line (https://github.com/pinterest/git-stacktrace/pull/13)
+
 0.7.1
 -----
 
