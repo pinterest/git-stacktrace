@@ -96,7 +96,7 @@ def lookup_stacktrace(traceback, git_range, fast):
 
     for line in traceback.lines:
         commits = []
-        if not (line.git_filename is None and fast is True):
+        if line.code and not (line.git_filename is None and fast is True):
             try:
                 commits = git.pickaxe(line.code, git_range, line.git_filename)
             except Exception:
