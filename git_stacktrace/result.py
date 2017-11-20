@@ -38,23 +38,27 @@ class Result(object):
         result += git.format_one_commit(self.commit) + '\n'
         if len(self.files_added) > 0:
             result += "Files Added:\n"
-        for f in self.files_added:
+        for f in sorted(self.files_added):
             result += "    - %s\n" % f
+
         if len(self.files_modified) > 0:
             result += "Files Modified:\n"
-        for f in self.files_modified:
+        for f in sorted(self.files_modified):
             result += "    - %s\n" % f
+
         if len(self.files_deleted) > 0:
             result += "Files Deleted:\n"
-        for f in self.files_deleted:
+        for f in sorted(self.files_deleted):
             result += "    - %s\n" % f
+
         if len(self.lines_added) > 0:
             result += "Lines Added:\n"
-        for line in self.lines_added:
+        for line in sorted(self.lines_added):
             result += '    - "%s"\n' % line
+
         if len(self.lines_removed) > 0:
             result += "Lines Removed:\n"
-        for line in self.lines_removed:
+        for line in sorted(self.lines_removed):
             result += '    - "%s"\n' % line
         return result
 
@@ -74,6 +78,16 @@ class Result(object):
         return (len(self.files_modified) + len(self.files_deleted)*2 + len(self.files_added)*3 +
                 len(self.lines_added)*3 + len(self.lines_removed)*2 + self._line_numbers_matched*4)
 
+    def __eq__(self, other):
+        return self.commit == other.commit
+
+    def __lt__(self, other):
+        if self.rank() == other.rank():
+            # Make sorted order deterministic (but random) if rank is same
+            # TODO fall back to sorting chronologically
+            return self.commit < other.commit
+        return self.rank() < other.rank()
+
 
 class Results(object):
     """List of results."""
@@ -89,7 +103,7 @@ class Results(object):
     def get_sorted_results(self):
         """Return list of results sorted by rank"""
         results = self.results.values()
-        return sorted(results, key=lambda r: r.rank(), reverse=True)
+        return sorted(results, reverse=True)
 
     def get_sorted_results_by_dict(self):
         """Return a list of dictionaries of the results sorted by rank"""
