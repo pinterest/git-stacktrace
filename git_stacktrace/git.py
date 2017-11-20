@@ -99,7 +99,7 @@ def pickaxe(snippet, git_range, filename=None):
 
     Return list of commits that modified that snippet
     """
-    cmd = 'git', 'log', '-b', '--pretty=%H', '-S', snippet.decode('string_escape'), git_range
+    cmd = 'git', 'log', '-b', '--pretty=%H', '-S', six.u(snippet), git_range
     if filename:
         cmd = cmd + ('--', filename,)
     commits = run_command(*cmd).splitlines()
