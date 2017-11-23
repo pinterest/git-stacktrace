@@ -41,7 +41,7 @@ class TestParsePythonStacktrace(base.TestCase):
 
     def test_exception(self):
         self.assertRaises(parse_trace.ParseException, parse_trace.PythonTraceback, "NOT A TRACEBACK")
-        with open('git_stacktrace/tests/examples/java.trace') as f:
+        with open('git_stacktrace/tests/examples/java1.trace') as f:
             self.assertRaises(parse_trace.ParseException, parse_trace.PythonTraceback, f.readlines())
 
     def test_file_match(self):
@@ -53,12 +53,12 @@ class TestParsePythonStacktrace(base.TestCase):
 class TestParseJavaStacktrace(base.TestCase):
 
     def get_trace(self):
-        with open('git_stacktrace/tests/examples/java.trace') as f:
+        with open('git_stacktrace/tests/examples/java1.trace') as f:
             trace = parse_trace.JavaTraceback(f.readlines())
         return trace
 
     def test_str(self):
-        with open('git_stacktrace/tests/examples/java.trace') as f:
+        with open('git_stacktrace/tests/examples/java1.trace') as f:
             expected = f.read()
         trace = self.get_trace()
         self.assertEqual(expected, str(trace))

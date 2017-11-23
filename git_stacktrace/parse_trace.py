@@ -20,13 +20,15 @@ class ParseException(Exception):
 
 class Line(object):
     """Track data for each line in stacktrace"""
-    def __init__(self, filename, line_number, function_name, code, class_name=None, native_method=False):
+    def __init__(self, filename, line_number, function_name, code, class_name=None,
+                 native_method=False, unknown_source=False):
         self.trace_filename = filename
         self.line_number = line_number
         self.function_name = function_name
         self.code = code
         self.class_name = class_name  # Java specific
         self.native_method = native_method  # Java specific
+        self.unknown_source = unknown_source  # Java specific
         self.git_filename = None
 
     def traceback_format(self):
@@ -164,12 +166,13 @@ class JavaTraceback(Traceback):
             raise ParseException("Missing tab at beginning of line")
 
         native_method = False
+        unknown_source = False
         if line_string.endswith("(Native Method)"):
             # "at java.io.FileInputStream.open(Native Method)"
             native_method = True
-
-        # TODO handle more java traceback formats (unknown source, etc.)
-        # TODO get smarter about matching things inside of parens.
+        if line_string.endswith("(Unknown Source)"):
+            # $Lambda$5/1034627183.run(Unknown Source)
+            unknown_source = True
 
         # split on ' ', '(', ')', ':'
         tokens = re.split(" |\(|\)|:", line_string.strip())
@@ -180,12 +183,12 @@ class JavaTraceback(Traceback):
         path = tokens[1].split('.')
         filename = '/'.join(path[:-2] + [tokens[2]])
         function_name = path[-1]
-        if not native_method:
+        if not native_method and not unknown_source:
             line_number = int(tokens[3])
         else:
             line_number = None
         class_name = path[-2]
-        return Line(filename, line_number, function_name, None, class_name, native_method)
+        return Line(filename, line_number, function_name, None, class_name, native_method, unknown_source)
 
     def _format_line(self, line):
         split = line.trace_filename.split('/')
@@ -193,6 +196,8 @@ class JavaTraceback(Traceback):
         filename = split[-1]
         if line.native_method:
             return "\tat %s.%s.%s(Native Method)\n" % (path, line.class_name, line.function_name)
+        if line.unknown_source:
+            return "\tat %s.%s.%s(Unknown Source)\n" % (path, line.class_name, line.function_name)
         return "\tat %s.%s.%s(%s:%d)\n" % (path, line.class_name, line.function_name, filename, line.line_number)
 
     def format_lines(self):

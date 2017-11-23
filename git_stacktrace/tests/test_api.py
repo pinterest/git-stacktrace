@@ -25,7 +25,7 @@ class TestApi(base.TestCase):
 
     def get_traceback(self, java=False):
         if java:
-            with open('git_stacktrace/tests/examples/java.trace') as f:
+            with open('git_stacktrace/tests/examples/java1.trace') as f:
                 traceback = api.parse_trace(f.readlines())
         else:
             with open('git_stacktrace/tests/examples/python3.trace') as f:
