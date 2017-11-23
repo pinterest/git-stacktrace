@@ -80,3 +80,20 @@ class TestGit(base.TestCase):
         self.assertTrue(git.line_match("hash1", line))
         line.line_number = 5
         self.assertFalse(git.line_match("hash1", line))
+
+    @mock.patch('git_stacktrace.git.run_command')
+    def test_pickaxe(self, mocked_command):
+        mocked_command.return_value = ""
+
+        git.pickaxe("for f in sorted(self.files_added):", "hash1..hash2")
+        expected = ('git', 'log', '-b', '--pretty=%H', '-S', u'for f in sorted(self.files_added):', 'hash1..hash2')
+        mocked_command.assert_called_with(*expected)
+
+        git.pickaxe("if 'a/b' in z", "hash1..hash2")
+        expected = ('git', 'log', '-b', '--pretty=%H', '-S', u"if 'a/b' in z", 'hash1..hash2')
+        mocked_command.assert_called_with(*expected)
+
+        git.pickaxe("for f in sorted(self.files_added):", "hash1..hash2", 'filename')
+        expected = ('git', 'log', '-b', '--pretty=%H', '-S', u'for f in sorted(self.files_added):',
+                    'hash1..hash2', '--', 'filename')
+        mocked_command.assert_called_with(*expected)

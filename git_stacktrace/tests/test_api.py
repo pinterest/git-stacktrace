@@ -23,9 +23,13 @@ class TestApi(base.TestCase):
         mocked_command.return_value = expected
         self.assertEqual(expected, api.valid_range('hash1..hash2'))
 
-    def get_traceback(self):
-        with open('git_stacktrace/tests/examples/python3.trace') as f:
-            traceback = api.parse_trace(f.readlines())
+    def get_traceback(self, java=False):
+        if java:
+            with open('git_stacktrace/tests/examples/java1.trace') as f:
+                traceback = api.parse_trace(f.readlines())
+        else:
+            with open('git_stacktrace/tests/examples/python3.trace') as f:
+                traceback = api.parse_trace(f.readlines())
         return traceback
 
     def setup_mocks(self, mock_files, mock_files_touched):
@@ -36,7 +40,7 @@ class TestApi(base.TestCase):
     @mock.patch('git_stacktrace.git.files_touched')
     @mock.patch('git_stacktrace.git.files')
     @mock.patch('git_stacktrace.git.line_match')
-    def test_lookup_stacktrace(self, mock_line_match, mock_files, mock_files_touched, mock_pickaxe):
+    def test_lookup_stacktrace_python(self, mock_line_match, mock_files, mock_files_touched, mock_pickaxe):
         mock_files_touched.return_value = True
         mock_line_match.return_value = False
         traceback = self.get_traceback()
@@ -44,6 +48,22 @@ class TestApi(base.TestCase):
         self.assertEqual(0, api.lookup_stacktrace(traceback, "hash1..hash3", fast=False).
                          get_sorted_results()[0]._line_numbers_matched)
         self.assertEqual(3, mock_pickaxe.call_count)
+
+    @mock.patch('git_stacktrace.git.pickaxe')
+    @mock.patch('git_stacktrace.git.files_touched')
+    @mock.patch('git_stacktrace.git.files')
+    @mock.patch('git_stacktrace.git.line_match')
+    def test_lookup_stacktrace_java(self, mock_line_match, mock_files, mock_files_touched, mock_pickaxe):
+        mock_files_touched.return_value = True
+        mock_line_match.return_value = True
+        traceback = self.get_traceback(java=True)
+        mock_files.return_value = ['devdaily/src/main/java/com/devdaily/tests/ExceptionTest.java']
+        mock_files_touched.return_value = {
+                'hash2':
+                [git.GitFile('devdaily/src/main/java/com/devdaily/tests/ExceptionTest.java', 'M')]}
+        self.assertEqual(2, api.lookup_stacktrace(traceback, "hash1..hash3", fast=False).
+                         get_sorted_results()[0]._line_numbers_matched)
+        self.assertEqual(0, mock_pickaxe.call_count)
 
     @mock.patch('git_stacktrace.git.pickaxe')
     @mock.patch('git_stacktrace.git.files_touched')

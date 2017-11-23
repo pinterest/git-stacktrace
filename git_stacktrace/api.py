@@ -14,10 +14,13 @@ Example usage::
         print r
 """
 
+import logging
 
 from git_stacktrace import git
 from git_stacktrace import result
 from git_stacktrace import parse_trace
+
+log = logging.getLogger(__name__)
 
 # So we can call api.parse_trace
 parse_trace = parse_trace.parse_trace
@@ -93,11 +96,13 @@ def lookup_stacktrace(traceback, git_range, fast):
 
     for line in traceback.lines:
         commits = []
-        if not (line.git_filename is None and fast is True):
+        if line.code and not (line.git_filename is None and fast is True):
             try:
                 commits = git.pickaxe(line.code, git_range, line.git_filename)
             except Exception:
                 # If this fails, move on
+                if log.isEnabledFor(logging.DEBUG):
+                    log.exception("pickaxe failed")
                 continue
         for commit, line_removed in commits:
             if line_removed is True:
