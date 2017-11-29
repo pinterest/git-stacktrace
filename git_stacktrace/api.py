@@ -8,7 +8,7 @@ Example usage::
 
     traceback = api.parse_trace(traceback_string)
     git_range = api.convert_since('1.day')
-    results = api.lookup_stacktrace(traceback, git_range, fast=False)
+    results = api.lookup_stacktrace(traceback, git_range)
     for r in results.get_sorted_results():
         print ""
         print r
@@ -74,7 +74,7 @@ def valid_range(git_range):
     return git.valid_range(git_range)
 
 
-def lookup_stacktrace(traceback, git_range, fast):
+def lookup_stacktrace(traceback, git_range, fast=False):
     """Lookup to see what commits in git_range could have caused the stacktrace.
 
     Pass in a stacktrace object and returns a results object.
