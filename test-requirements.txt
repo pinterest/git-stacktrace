@@ -1,6 +1,6 @@
 testtools
 flake8
-testrepository
+pytest
 python-subunit
 fixtures
 mock
