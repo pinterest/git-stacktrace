@@ -1,6 +1,7 @@
 from __future__ import print_function
 
 import collections
+import datetime
 import re
 import subprocess
 import sys
@@ -11,6 +12,8 @@ import six
 import whatthepatch
 
 SHA1_REGEX = re.compile(r'\b[0-9a-f]{40}\b')
+
+CommitInfo = collections.namedtuple('CommitInfo', ['summary', 'subject', 'body', 'url', 'author', 'date'])
 
 
 class GitFile(object):
@@ -149,10 +152,10 @@ def line_match(commit, traceback_line):
 
 def format_one_commit(commit):
     result = []
-    custom, full, url = get_commit_info(commit)
-    result.append(custom)
-    if url:
-        result.append("Link:        " + url)
+    info = get_commit_info(commit)
+    result.append(info.summary)
+    if info.url:
+        result.append("Link:        " + info.url)
     return '\n'.join(result)
 
 
@@ -164,16 +167,24 @@ def get_commit_info(commit, color=True):
         cmd_prefix = 'git', 'log', '-1'
     git_format = ('--format=%C(auto,yellow)commit %H%C(auto,reset)%n'
                   'Commit Date: %cD%nAuthor:      %aN <%aE>%nSubject:     %s')
-    custom = run_command(*(cmd_prefix + (git_format, commit)))
+    summary = run_command(*(cmd_prefix + (git_format, commit)))
 
     # Find phabricator URL
     cmd = 'git', 'log', '-1', '--pretty=%b', commit
-    full = run_command(*cmd)
+    body = run_command(*cmd)
     url = None
-    for line in full.splitlines():
+    for line in body.splitlines():
         if line.startswith("Differential Revision:"):
             url = line.split(' ')[2]
-    return custom, full, url
+
+    cmd = 'git', 'log', '-1', '--format=%ct|%aN <%aE>', str(commit)
+    date, author = run_command(*cmd).split('|', 1)
+    date = datetime.datetime.fromtimestamp(int(date))
+
+    cmd = 'git', 'log', '-1', '--format=%s', str(commit)
+    subject = run_command(*cmd)
+
+    return CommitInfo(summary=summary, subject=subject, body=body, url=url, author=author, date=date)
 
 
 def valid_range(git_range):

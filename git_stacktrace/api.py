@@ -10,8 +10,9 @@ Example usage::
     git_range = api.convert_since('1.day')
     results = api.lookup_stacktrace(traceback, git_range)
     for r in results.get_sorted_results():
-        print ""
-        print r
+        if "Smith" in r.author
+            print("")
+            print(r)
 """
 
 import logging

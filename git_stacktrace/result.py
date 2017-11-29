@@ -5,17 +5,60 @@ class Result(object):
     """Track matches to stacktrace in a given commit."""
 
     def __init__(self, commit):
-        self._commit = commit
+        self.__commit = commit
         self.files_modified = set()
         self.files_deleted = set()
         self.files_added = set()
         self.lines_added = set()
         self.lines_removed = set()
         self._line_numbers_matched = 0
+        self.__commit_info_fetched = False
+
+    def _lazy_fetch(self):
+        if not self.__commit_info_fetched:
+            self.__info = git.get_commit_info(self.commit, color=False)
+            self.__commit_info_fetched = True
 
     @property
     def commit(self):
-        return self._commit
+        """git commit hash"""
+        return self.__commit
+
+    @property
+    def summary(self):
+        """pre-formatted summary of git commit information"""
+        self._lazy_fetch()
+        return self.__info.summary
+
+    @property
+    def subject(self):
+        """commit subject"""
+        self._lazy_fetch()
+        return self.__info.subject
+
+    @property
+    def body(self):
+        """body of commit message"""
+        self._lazy_fetch()
+        return self.__info.body
+
+    @property
+    def url(self):
+        """url found in commit body"""
+        self._lazy_fetch()
+        return self.__info.url
+
+    @property
+    def author(self):
+        """commit author"""
+        self._lazy_fetch()
+        return self.__info.author
+
+    @property
+    def date(self):
+        """commit date (not author date)"""
+        self._lazy_fetch()
+        return self.__info.date
 
     def add_file(self, git_file, line_number=None):
         if line_number:
@@ -63,11 +106,14 @@ class Result(object):
         return result
 
     def __iter__(self):
-        custom, full, url = git.get_commit_info(self.commit, color=False)
+        self._lazy_fetch()
         yield 'commit', self.commit
-        yield 'custom', custom
-        yield 'full', full
-        yield 'url', url
+        yield 'summary', self.summary
+        yield 'subject', self.subject
+        yield 'body', self.body
+        yield 'url', self.url
+        yield 'author', self.author
+        yield 'date', self.date
         yield 'files_added', list(self.files_added)
         yield 'files_modified', list(self.files_modified)
         yield 'files_deleted', list(self.files_deleted)

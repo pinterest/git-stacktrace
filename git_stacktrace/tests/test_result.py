@@ -5,6 +5,9 @@ from git_stacktrace.tests import base
 from git_stacktrace import git
 from git_stacktrace import result
 
+fake_commit_info = git.CommitInfo(summary='summary', subject='subject', body='body', url='url',
+                                  author='author', date=None)
+
 
 class TestResult(base.TestCase):
     commit_hash = 'hash1'
@@ -43,36 +46,36 @@ class TestResult(base.TestCase):
 
     @mock.patch('git_stacktrace.git.get_commit_info')
     def test_str(self, mocked_git_info):
-        mocked_git_info.return_value = "custom", "full", "url"
+        mocked_git_info.return_value = fake_commit_info
         commit1 = result.Result(self.commit_hash)
         commit1.add_file(git.GitFile('file1', 'M'))
-        expected = "custom\nLink:        url\nFiles Modified:\n    - file1\n"
+        expected = "summary\nLink:        url\nFiles Modified:\n    - file1\n"
         commit1.add_file(git.GitFile('file2', 'A'))
-        expected = "custom\nLink:        url\nFiles Added:\n    - file2\nFiles Modified:\n    - file1\n"
+        expected = "summary\nLink:        url\nFiles Added:\n    - file2\nFiles Modified:\n    - file1\n"
         self.assertEqual(expected, str(commit1))
         commit1.lines_added.add('pass')
-        expected = ("custom\nLink:        url\nFiles Added:\n    - file2\nFiles Modified:\n    - "
+        expected = ("summary\nLink:        url\nFiles Added:\n    - file2\nFiles Modified:\n    - "
                     "file1\nLines Added:\n    - \"pass\"\n")
         commit1.lines_removed.add('True')
-        expected = ("custom\nLink:        url\nFiles Added:\n    - file2\nFiles Modified:\n    - "
+        expected = ("summary\nLink:        url\nFiles Added:\n    - file2\nFiles Modified:\n    - "
                     "file1\nLines Added:\n    - \"pass\"\nLines Removed:\n    - \"True\"\n")
         commit1.add_file(git.GitFile('file3', 'D'), line_number=11)
-        expected = ("custom\nLink:        url\nFiles Added:\n    - file2\nFiles Modified:\n    - "
+        expected = ("summary\nLink:        url\nFiles Added:\n    - file2\nFiles Modified:\n    - "
                     "file1\nFiles Deleted:\n    - file3:11\nLines Added:\n    - "
                     "\"pass\"\nLines Removed:\n    - \"True\"\n")
         self.assertEqual(expected, str(commit1))
 
     @mock.patch('git_stacktrace.git.get_commit_info')
     def test_str_no_url(self, mocked_git_info):
-        mocked_git_info.return_value = "custom", "full", None
+        mocked_git_info.return_value = git.CommitInfo('summary', 'subject', 'body', None, 'author', None)
         commit1 = result.Result(self.commit_hash)
         commit1.add_file(git.GitFile('file1', 'M'))
-        expected = "custom\nFiles Modified:\n    - file1\n"
+        expected = "summary\nFiles Modified:\n    - file1\n"
         self.assertEqual(expected, str(commit1))
         commit1.lines_added.add('pass')
-        expected = "custom\nFiles Modified:\n    - file1\nLines Added:\n    - \"pass\"\n"
+        expected = "summary\nFiles Modified:\n    - file1\nLines Added:\n    - \"pass\"\n"
         commit1.lines_removed.add('True')
-        expected = ("custom\nFiles Modified:\n    - file1\nLines Added:\n    - \"pass\"\nLines "
+        expected = ("summary\nFiles Modified:\n    - file1\nLines Added:\n    - \"pass\"\nLines "
                     "Removed:\n    - \"True\"\n")
         self.assertEqual(expected, str(commit1))
 
@@ -90,7 +93,7 @@ class TestResult(base.TestCase):
 
     @mock.patch('git_stacktrace.git.get_commit_info')
     def test_dict(self, mocked_git_info):
-        mocked_git_info.return_value = "custom", "full", "url"
+        mocked_git_info.return_value = fake_commit_info
         commit1 = result.Result(self.commit_hash)
         commit1.add_file(git.GitFile('file1', 'M'))
         commit1.add_file(git.GitFile('file2', 'A'), line_number=12)
@@ -102,12 +105,27 @@ class TestResult(base.TestCase):
                     'files_added': ['file2:12'],
                     'files_modified': ['file1'],
                     'files_deleted': ['file3'],
-                    'full': 'full',
+                    'body': 'body',
+                    'date': None,
+                    'author': 'author',
+                    'subject': 'subject',
                     'lines_added': ['pass'],
                     'lines_removed': ['True'],
-                    'custom': 'custom',
+                    'summary': 'summary',
                     'url': 'url'}
         self.assertEqual(expected, dict(commit1))
+
+    @mock.patch('git_stacktrace.git.get_commit_info')
+    def test_git_info(self, mocked_git_info):
+        mocked_git_info.return_value = fake_commit_info
+        commit1 = result.Result(self.commit_hash)
+        self.assertEqual(commit1.summary, "summary")
+        self.assertEqual(commit1.subject, "subject")
+        self.assertEqual(commit1.body, "body")
+        self.assertEqual(commit1.url, "url")
+        self.assertEqual(commit1.author, "author")
+        self.assertEqual(commit1.date, None)
+        self.assertEqual(mocked_git_info.call_count, 1)
 
 
 class TestResults(base.TestCase):
@@ -137,7 +155,7 @@ class TestResults(base.TestCase):
 
     @mock.patch('git_stacktrace.git.get_commit_info')
     def test_get_sorted_results_by_dict(self, mocked_git_info):
-        mocked_git_info.return_value = "custom", "full", "url"
+        mocked_git_info.return_value = fake_commit_info
         results = result.Results()
         commit2 = results.get_result('hash2')
         commit1 = results.get_result('hash1')
