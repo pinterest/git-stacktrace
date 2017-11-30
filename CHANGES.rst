@@ -1,6 +1,13 @@
 Change Log
 ==========
 
+0.8.0
+-----
+
+* Fix pickaxe support for python3
+* Improve java traceback support
+* Improve the python api
+
 0.7.2
 -----
 
