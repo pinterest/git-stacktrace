@@ -124,7 +124,7 @@ class TestResult(base.TestCase):
         self.assertEqual(commit1.body, "body")
         self.assertEqual(commit1.url, "url")
         self.assertEqual(commit1.author, "author")
-        self.assertIsNone(commit1.date, None)
+        self.assertIsNone(commit1.date)
         self.assertEqual(mocked_git_info.call_count, 1)
 
 
