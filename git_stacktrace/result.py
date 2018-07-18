@@ -121,8 +121,8 @@ class Result(object):
         yield 'lines_removed', list(self.lines_removed)
 
     def rank(self):
-        return (len(self.files_modified) + len(self.files_deleted)*2 + len(self.files_added)*3 +
-                len(self.lines_added)*3 + len(self.lines_removed)*2 + self._line_numbers_matched*4)
+        return (len(self.files_modified) + len(self.files_deleted) * 2 + len(self.files_added) * 3 +
+                len(self.lines_added) * 3 + len(self.lines_removed) * 2 + self._line_numbers_matched * 4)
 
     def __eq__(self, other):
         return self.commit == other.commit

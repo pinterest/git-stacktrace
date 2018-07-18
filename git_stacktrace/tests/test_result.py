@@ -101,18 +101,18 @@ class TestResult(base.TestCase):
         commit1.lines_removed.add('True')
         commit1.lines_added.add('pass')
         expected = {
-                    'commit': 'hash1',
-                    'files_added': ['file2:12'],
-                    'files_modified': ['file1'],
-                    'files_deleted': ['file3'],
-                    'body': 'body',
-                    'date': None,
-                    'author': 'author',
-                    'subject': 'subject',
-                    'lines_added': ['pass'],
-                    'lines_removed': ['True'],
-                    'summary': 'summary',
-                    'url': 'url'}
+            'commit': 'hash1',
+            'files_added': ['file2:12'],
+            'files_modified': ['file1'],
+            'files_deleted': ['file3'],
+            'body': 'body',
+            'date': None,
+            'author': 'author',
+            'subject': 'subject',
+            'lines_added': ['pass'],
+            'lines_removed': ['True'],
+            'summary': 'summary',
+            'url': 'url'}
         self.assertEqual(expected, dict(commit1))
 
     @mock.patch('git_stacktrace.git.get_commit_info')
@@ -124,7 +124,7 @@ class TestResult(base.TestCase):
         self.assertEqual(commit1.body, "body")
         self.assertEqual(commit1.url, "url")
         self.assertEqual(commit1.author, "author")
-        self.assertEqual(commit1.date, None)
+        self.assertIsNone(commit1.date, None)
         self.assertEqual(mocked_git_info.call_count, 1)
 
 

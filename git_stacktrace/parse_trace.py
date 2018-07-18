@@ -115,12 +115,12 @@ class PythonTraceback(Traceback):
                 f = words[0].split('"')[1].strip()
                 line_number = int(words[1].split(' ')[1])
                 function_name = ' '.join(words[2].split(' ')[1:]).strip()
-                if len(lines) == i+1 or lines[i+1].startswith(self.FILE_LINE_START):
+                if len(lines) == i + 1 or lines[i + 1].startswith(self.FILE_LINE_START):
                     # Not all lines have code in the traceback
                     code = None
                 else:
                     code_line = True
-                    code = str(lines[i+1].strip())
+                    code = str(lines[i + 1].strip())
 
                 try:
                     extracted.append(Line(filename=f, line_number=line_number, function_name=function_name, code=code))
