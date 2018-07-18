@@ -6,11 +6,11 @@ from git_stacktrace import parse_trace
 
 class TestParsePythonStacktrace(base.TestCase):
     trace3_expected = [
-            ('../common/utils/geo_utils.py', 68, 'get_ip_geo', 'return get_geo_db().record_by_addr(ip_address)'),
-            ('/mnt/virtualenv_A/local/lib/python2.7/site-packages/pygeoip/__init__.py', 563,
-                'record_by_addr', 'ipnum = util.ip2long(addr)'),
-            ('/mnt/virtualenv_A/local/lib/python2.7/site-packages/pygeoip/util.py', 36, 'ip2long',
-                'return int(binascii.hexlify(socket.inet_pton(socket.AF_INET6, ip)), 16)')]
+        ('../common/utils/geo_utils.py', 68, 'get_ip_geo', 'return get_geo_db().record_by_addr(ip_address)'),
+        ('/mnt/virtualenv_A/local/lib/python2.7/site-packages/pygeoip/__init__.py', 563,
+            'record_by_addr', 'ipnum = util.ip2long(addr)'),
+        ('/mnt/virtualenv_A/local/lib/python2.7/site-packages/pygeoip/util.py', 36, 'ip2long',
+            'return int(binascii.hexlify(socket.inet_pton(socket.AF_INET6, ip)), 16)')]
 
     def get_trace(self, number=3):
         with open('git_stacktrace/tests/examples/python%d.trace' % number) as f:

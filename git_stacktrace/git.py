@@ -19,11 +19,14 @@ CommitInfo = collections.namedtuple('CommitInfo', ['summary', 'subject', 'body',
 class GitFile(object):
     """Track filename and if file was added/removed or modified."""
     ADDED = 'A'
+    COPY_EDIT = 'C'
     DELETED = 'D'
     MODIFIED = 'M'
-    COPY_EDIT = 'C'
     RENAME_EDIT = 'R'
-    VALID = frozenset([ADDED, DELETED, MODIFIED, COPY_EDIT, RENAME_EDIT])
+    TYPE = 'T'
+    UNMERGED = 'U'
+    UNKNOWN = 'X'
+    VALID = frozenset([ADDED, DELETED, MODIFIED, COPY_EDIT, RENAME_EDIT, TYPE, UNMERGED, UNKNOWN])
 
     def __init__(self, filename, state=None):
         self.filename = filename

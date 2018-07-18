@@ -59,8 +59,8 @@ class TestApi(base.TestCase):
         traceback = self.get_traceback(java=True)
         mock_files.return_value = ['devdaily/src/main/java/com/devdaily/tests/ExceptionTest.java']
         mock_files_touched.return_value = {
-                'hash2':
-                [git.GitFile('devdaily/src/main/java/com/devdaily/tests/ExceptionTest.java', 'M')]}
+            'hash2':
+            [git.GitFile('devdaily/src/main/java/com/devdaily/tests/ExceptionTest.java', 'M')]}
         self.assertEqual(2, api.lookup_stacktrace(traceback, "hash1..hash3", fast=False).
                          get_sorted_results()[0]._line_numbers_matched)
         self.assertEqual(0, mock_pickaxe.call_count)
