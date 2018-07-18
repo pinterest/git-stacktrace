@@ -1,6 +1,11 @@
 Change Log
 ==========
 
+0.8.1
+-----
+
+* Add several missing rare git file states (T, U, X)
+
 0.8.0
 -----
 
