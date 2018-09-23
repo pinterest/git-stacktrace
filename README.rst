@@ -35,6 +35,7 @@ For the CLI see: ``git stacktrace -h``
 
 For the Python API see: ``git_stacktrace/api.py``
 
+To run as a web server: ``git stacktrace --server --port 8080``
 
 Examples
 --------
