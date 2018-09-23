@@ -59,7 +59,7 @@ class Args(object):
                 return ("Found no commits in '%s'" % self.git_range, )
 
         elif self.type == 'by-range':
-            self.git_range = git_range
+            self.git_range = self.range
             if not api.valid_range(self.git_range):
                 return ("Found no commits in '%s'" % self.git_range, )
         else:
