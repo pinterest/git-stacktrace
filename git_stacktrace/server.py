@@ -77,15 +77,27 @@ class IndexPage(object):
     def __init__(self, args):
         self.cwd = os.getcwd()
         self.args = args
-        self.messages = args.validate()
-        self.output = args.get_trace()
+        try:
+            self.messages = args.validate()
+            self.output = args.get_trace()
+        except Exception as e:
+            self.messages = (e.message)
+            self.output = ''
+
+    def render_messages(self):
+        with open('git_stacktrace/templates/messages.html') as f:
+            t = Template(f.read())
+            return t.substitute(
+                messages=escape(self.messages)
+            ).encode('utf-8')
 
     def render(self):
-        with open('git_stacktrace/templates/form.html') as f:
+        with open('git_stacktrace/templates/page.html') as f:
             t = Template(f.read())
             optionType = 'by-date' if self.args.type == '' else self.args.type
             return t.substitute(
                 pwd=escape(self.cwd),
+                messages=self.render_messages(),
                 range=escape(self.args.range),
                 branch=escape(self.args.branch),
                 since=escape(self.args.since),
