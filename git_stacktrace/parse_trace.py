@@ -175,7 +175,7 @@ class JavaTraceback(Traceback):
             unknown_source = True
 
         # split on ' ', '(', ')', ':'
-        tokens = re.split(" |\(|\)|:", line_string.strip())
+        tokens = re.split(r" |\(|\)|:", line_string.strip())
 
         if tokens[0] != "at" or len(tokens) != 5:
             raise ParseException("Invalid Java Exception")
