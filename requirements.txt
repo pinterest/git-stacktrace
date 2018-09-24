@@ -1,2 +1,3 @@
 whatthepatch
 six
+simplejson

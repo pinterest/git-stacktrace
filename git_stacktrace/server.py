@@ -2,11 +2,12 @@ from __future__ import print_function
 
 import logging
 import os
+import simplejson as json
 
 from cgi import escape
 from git_stacktrace import api
 from six.moves.BaseHTTPServer import BaseHTTPRequestHandler
-from six.moves.BaseHTTPServer import HTTPServer # from http.server import HTTPServer
+from six.moves.BaseHTTPServer import HTTPServer
 from six.moves.html_parser import HTMLParser
 from six.moves.urllib_parse import parse_qs
 from string import Template
@@ -17,8 +18,16 @@ def unescape(s):
 
 
 class Args(object):
-    def __init__(self, path):
-        self.params = parse_qs(path[2:])
+    @staticmethod
+    def from_json_body(body):
+        return Args(json.loads(body))
+
+    @staticmethod
+    def from_path(path):
+        return Args(parse_qs(path[2:]))
+
+    def __init__(self, params):
+        self.params = params
 
     def _get_field(self, field, default=''):
         return unescape(self.params.get(field, [default])[0])
@@ -49,7 +58,7 @@ class Args(object):
 
     def validate(self):
         if self.type == '':
-            return ()
+            return None
 
         if self.type == 'by-date':
             if self.since == '':
@@ -57,58 +66,86 @@ class Args(object):
             self.git_range = api.convert_since(self.since, branch=self.branch)
             if not api.valid_range(self.git_range):
                 return ("Found no commits in '%s'" % self.git_range, )
-
         elif self.type == 'by-range':
             self.git_range = self.range
             if not api.valid_range(self.git_range):
                 return ("Found no commits in '%s'" % self.git_range, )
         else:
             return ('Invalid options type. Expected `by-date` or `by-range`.', )
+        return None
 
-    def get_trace(self):
+    def get_results(self):
         if self.trace:
             traceback = api.parse_trace(self.trace)
             return api.lookup_stacktrace(traceback, self.git_range, fast=self.fast)
         else:
-            return ''
+            return None
 
 
-class IndexPage(object):
+class ResultsOutput(object):
     def __init__(self, args):
         self.cwd = os.getcwd()
         self.args = args
         try:
             self.messages = args.validate()
-            self.output = args.get_trace()
+            self.results = args.get_results()
         except Exception as e:
             self.messages = (e.message)
-            self.output = ''
+            self.results = None
 
-    def render_messages(self):
+    def get_json(self):
+        if self.results is None:
+            return json.dumps({
+                'errors': self.messages,
+                'commits': [],
+            })
+        elif len(self.results) == 0:
+            return json.dumps({
+                'errors': 'No matches found',
+                'commits': [],
+            })
+        else:
+            return json.dumps({
+                'errors': None,
+                'commits': self.results.get_sorted_results_by_dict(),
+            })
+
+    def get_html_messages(self):
+        if self.messages is None:
+            return ''
         with open('git_stacktrace/templates/messages.html') as f:
             t = Template(f.read())
             return t.substitute(
                 messages=escape(self.messages)
             ).encode('utf-8')
 
-    def render(self):
+    def get_html_results(self):
+        if self.results is None or len(self.results) == 0:
+            return ''
+        else:
+            sorted_results = self.results.get_sorted_results()
+            return '\n<hr/>\n'.join(
+                ['<pre><code>' + escape(str(result)) + '</code></pre>' for result in sorted_results]
+            )
+
+    def get_html(self):
         with open('git_stacktrace/templates/page.html') as f:
             t = Template(f.read())
             optionType = 'by-date' if self.args.type == '' else self.args.type
             return t.substitute(
                 pwd=escape(self.cwd),
-                messages=self.render_messages(),
+                messages=self.get_html_messages(),
                 range=escape(self.args.range),
                 branch=escape(self.args.branch),
                 since=escape(self.args.since),
                 trace=escape(self.args.trace),
                 fast='checked' if self.args.fast else '',
-                optionType=optionType,
+                optionType=escape(optionType),
                 isByDate='true' if optionType == 'by-date' else 'false',
                 isByRange='true' if optionType == 'by-range' else 'false',
                 byDateClass='active' if optionType == 'by-date' else '',
                 byRangeClass='active' if optionType == 'by-range' else '',
-                output=escape(''),
+                results=self.get_html_results()
             ).encode('utf-8')
 
 
@@ -124,20 +161,30 @@ class GitStacktraceHandler(BaseHTTPRequestHandler):
     def do_GET(self):
         if (self.path == '/' or self.path.startswith('/?')):
             try:
-                page = IndexPage(Args(self.path))
+                page = ResultsOutput(Args.from_path(self.path))
                 self._set_headers()
-                self.wfile.write(page.render())
+                self.wfile.write(page.get_html())
             except Exception as e:
                 logging.error(e)
                 self._set_headers(500)
         else:
             self._set_headers(404)
 
+    def do_POST(self):
+        if (self.path == '/'):
+            try:
+                page = ResultsOutput(Args.from_json_body(self.rfile.read(34)))
+                self._set_headers(200, 'application/json')
+                self.wfile.write(page.get_json())
+            except Exception as e:
+                logging.error(e)
+                self._set_headers(500, 'application/json')
+                self.wfile.write(json.dumps({'error': e}))
+        else:
+            self._set_headers(404, 'application/json')
+
 
 def run(server_class=HTTPServer, handler_class=GitStacktraceHandler, port=80):
-    print(dir(server_class))
-    print(BaseHTTPRequestHandler)
-
     server_address = ('', port)
     httpd = server_class(server_address, handler_class)
     print('Starting httpd...')
