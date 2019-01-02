@@ -37,8 +37,8 @@ def main():
         logging.getLogger().setLevel(logging.DEBUG)
 
     if args.server:
-        httpd = make_server('', 8000, server.application)
-        print("Starting httpd...")
+        print("Starting httpd on port %s..." % args.port)
+        httpd = make_server('', args.port, server.application)
         httpd.serve_forever()
         httpd.close()
         sys.exit(0)

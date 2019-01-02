@@ -173,14 +173,14 @@
     </form>
   </main>
   <script>
-    // Need to escape dollar-sign in templates, so use `jQuery` variable instead
+    // Need to escape dollar-sign in py templates, use `jQuery` variable instead
     jQuery(function () {
       jQuery('[data-toggle="tooltip"]').tooltip();
       jQuery('a[data-toggle="pill"]').on('shown.bs.tab', function (e) {
         var name = e.target.getAttribute('data-input-name');
         var val = e.target.getAttribute('data-input-value');
         console.log('setting', name, val)
-        jQuery('input[name="' + name + '"]').val(val);
+        document.querySelector('input[name="' + name + '"]').setAttribute('value', val);
       });
     });
   </script>

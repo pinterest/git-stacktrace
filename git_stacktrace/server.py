@@ -7,12 +7,11 @@ import wsgiref
 
 from cgi import escape
 from git_stacktrace import api
-# from six.moves.BaseHTTPServer import BaseHTTPRequestHandler
-# from six.moves.BaseHTTPServer import HTTPServer
 from six.moves.html_parser import HTMLParser
 from six.moves.urllib_parse import parse_qs
 from string import Template
 
+log = logging.getLogger(__name__)
 
 def unescape(s):
     return HTMLParser().unescape(s)
@@ -24,8 +23,8 @@ class Args(object):
         return Args(json.loads(body))
 
     @staticmethod
-    def from_path(path):
-        return Args(parse_qs(path[2:]))
+    def from_qs(query_string):
+        return Args(parse_qs(query_string))
 
     def __init__(self, params):
         self.params = params
@@ -63,16 +62,16 @@ class Args(object):
 
         if self.type == 'by-date':
             if not self.since:
-                return ('Missing `since` value. Plese specify a date.', )
+                return 'Missing `since` value. Plese specify a date.'
             self.git_range = api.convert_since(self.since, branch=self.branch)
             if not api.valid_range(self.git_range):
-                return ("Found no commits in '%s'" % self.git_range, )
+                return "Found no commits in '%s'" % self.git_range
         elif self.type == 'by-range':
             self.git_range = self.range
             if not api.valid_range(self.git_range):
-                return ("Found no commits in '%s'" % self.git_range, )
+                return "Found no commits in '%s'" % self.git_range
         else:
-            return ('Invalid options type. Expected `by-date` or `by-range`.', )
+            return 'Invalid options type. Expected `by-date` or `by-range`.'
         return None
 
     def get_results(self):
@@ -146,7 +145,7 @@ class ResultsOutput(object):
                 isByRange='true' if optionType == 'by-range' else 'false',
                 byDateClass='active' if optionType == 'by-date' else '',
                 byRangeClass='active' if optionType == 'by-range' else '',
-                results=self.results_as_html()
+                results=self.results_as_html(),
             ).encode('utf-8')
 
 
@@ -159,11 +158,11 @@ class GitStacktraceApplication(object):
     def __iter__(self):
         method = self.environ['REQUEST_METHOD']
         if method == 'HEAD':
-            yield self.do_HEAD()
+            yield self.do_HEAD() or ''
         elif method == 'GET':
-            yield self.do_GET()
+            yield self.do_GET() or ''
         elif method == 'POST':
-            yield self.do_POST()
+            yield self.do_POST() or ''
 
     def _set_headers(self, code=200, content_type='text/html'):
         codes = {
@@ -181,15 +180,17 @@ class GitStacktraceApplication(object):
         self._set_headers()
 
     def do_GET(self):
-        if self.path == '/':
+        if self.path == '/favicon.ico':
+            self._set_headers()
+        elif self.path == '/':
             try:
                 html = ResultsOutput(
-                    Args.from_path(self.path)
+                    Args.from_qs(self.environ['QUERY_STRING'])
                 ).render_page()
                 self._set_headers()
                 return html
             except Exception as e:
-                logging.error(e)
+                log.error(e)
                 self._set_headers(500)
         else:
             self._set_headers(404)
@@ -203,7 +204,7 @@ class GitStacktraceApplication(object):
                 self._set_headers(200, 'application/json')
                 return json
             except Exception as e:
-                logging.error(e)
+                log.error(e)
                 self._set_headers(500, 'application/json')
                 return json.dumps({'error': e})
         else:
