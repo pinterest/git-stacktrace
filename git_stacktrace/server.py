@@ -3,11 +3,12 @@ from __future__ import print_function
 import json
 import logging
 import os
+import wsgiref
 
 from cgi import escape
 from git_stacktrace import api
-from six.moves.BaseHTTPServer import BaseHTTPRequestHandler
-from six.moves.BaseHTTPServer import HTTPServer
+# from six.moves.BaseHTTPServer import BaseHTTPRequestHandler
+# from six.moves.BaseHTTPServer import HTTPServer
 from six.moves.html_parser import HTMLParser
 from six.moves.urllib_parse import parse_qs
 from string import Template
@@ -61,7 +62,7 @@ class Args(object):
             return None
 
         if self.type == 'by-date':
-            if not self.since
+            if not self.since:
                 return ('Missing `since` value. Plese specify a date.', )
             self.git_range = api.convert_since(self.since, branch=self.branch)
             if not api.valid_range(self.git_range):
@@ -149,21 +150,44 @@ class ResultsOutput(object):
             ).encode('utf-8')
 
 
-class GitStacktraceHandler(BaseHTTPRequestHandler):
+class GitStacktraceApplication(object):
+    def __init__(self, environ, start_response):
+        self.environ = environ
+        self.start_response = start_response
+        self.path = environ['PATH_INFO']
+
+    def __iter__(self):
+        method = self.environ['REQUEST_METHOD']
+        if method == 'HEAD':
+            yield self.do_HEAD()
+        elif method == 'GET':
+            yield self.do_GET()
+        elif method == 'POST':
+            yield self.do_POST()
+
     def _set_headers(self, code=200, content_type='text/html'):
-        self.send_response(code)
-        self.send_header('Content-type', content_type)
-        self.end_headers()
+        codes = {
+            200: "200 OK",
+            404: "404 Not Found",
+            500: "500 Internal Server Error",
+        }
+        self.start_response(codes[code], [('Content-type', content_type)])
+
+    def _request_body(self):
+        content_length = int(self.environ['CONTENT_LENGTH'])
+        return self.environ['wsgi.input'].read(content_length)
 
     def do_HEAD(self):
         self._set_headers()
 
     def do_GET(self):
-        if (self.path == '/' or self.path.startswith('/?')):
+        if self.path == '/':
             try:
-                page = ResultsOutput(Args.from_path(self.path))
+                html = ResultsOutput(
+                    Args.from_path(self.path)
+                ).render_page()
                 self._set_headers()
-                self.wfile.write(page.render_page())
+                return html
             except Exception as e:
                 logging.error(e)
                 self._set_headers(500)
@@ -173,23 +197,17 @@ class GitStacktraceHandler(BaseHTTPRequestHandler):
     def do_POST(self):
         if (self.path == '/'):
             try:
-                page = ResultsOutput(Args.from_json_body(self.rfile.read(34)))
+                json = ResultsOutput(
+                    Args.from_json_body(self._request_body())
+                ).results_as_json()
                 self._set_headers(200, 'application/json')
-                self.wfile.write(page.results_as_json())
+                return json
             except Exception as e:
                 logging.error(e)
                 self._set_headers(500, 'application/json')
-                self.wfile.write(json.dumps({'error': e}))
+                return json.dumps({'error': e})
         else:
             self._set_headers(404, 'application/json')
 
 
-def run(server_class=HTTPServer, handler_class=GitStacktraceHandler, port=80):
-    server_address = ('', port)
-    httpd = server_class(server_address, handler_class)
-    print('Starting httpd...')
-    try:
-        httpd.serve_forever()
-    except KeyboardInterrupt:
-        pass
-    httpd.server_close()
+application = GitStacktraceApplication

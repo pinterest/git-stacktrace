@@ -9,6 +9,7 @@ import sys
 import git_stacktrace
 from git_stacktrace import api
 from git_stacktrace import server
+from wsgiref.simple_server import make_server
 
 
 def main():
@@ -36,7 +37,10 @@ def main():
         logging.getLogger().setLevel(logging.DEBUG)
 
     if args.server:
-        server.run(port=args.port)
+        httpd = make_server('', 8000, server.application)
+        print("Starting httpd...")
+        httpd.serve_forever()
+        httpd.close()
         sys.exit(0)
 
     if args.since:
