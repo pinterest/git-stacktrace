@@ -37,7 +37,7 @@ For the Python API see: ``git_stacktrace/api.py``
 
 To run as a web server: ``git stacktrace --server --port 8080``
 
-Use the web server as an api:
+Use the web server as an API:
 
 .. code-block:: sh
 

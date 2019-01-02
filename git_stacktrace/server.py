@@ -1,8 +1,8 @@
 from __future__ import print_function
 
+import json
 import logging
 import os
-import simplejson as json
 
 from cgi import escape
 from git_stacktrace import api
@@ -57,11 +57,11 @@ class Args(object):
         return self._get_field('fast') == 'on'
 
     def validate(self):
-        if self.type == '':
+        if not self.type:
             return None
 
         if self.type == 'by-date':
-            if self.since == '':
+            if not self.since
                 return ('Missing `since` value. Plese specify a date.', )
             self.git_range = api.convert_since(self.since, branch=self.branch)
             if not api.valid_range(self.git_range):
@@ -120,7 +120,7 @@ class ResultsOutput(object):
             ).encode('utf-8')
 
     def get_html_results(self):
-        if self.results is None or len(self.results) == 0:
+        if not self.results:
             return ''
         else:
             sorted_results = self.results.get_sorted_results()
@@ -131,7 +131,7 @@ class ResultsOutput(object):
     def get_html(self):
         with open('git_stacktrace/templates/page.html') as f:
             t = Template(f.read())
-            optionType = 'by-date' if self.args.type == '' else self.args.type
+            optionType = 'by-date' if not self.args.type else self.args.type
             return t.substitute(
                 pwd=escape(self.cwd),
                 messages=self.get_html_messages(),
