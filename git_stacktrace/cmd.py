@@ -22,7 +22,8 @@ def main():
     range_group.add_argument('range', nargs='?', help='git commit range to use')
     range_group.add_argument('--server', action="store_true", help='start a '
                              'webserver to visually interact with git-stacktrace')
-    parser.add_argument('--port', default=8080, type=int, help='Server port')
+    parser.add_argument('--port', default=os.environ.get('GIT_STACKTRACE_PORT', 8080),
+                        type=int, help='Server port')
     parser.add_argument('-f', '--fast', action="store_true", help='Speed things up by not running '
                         'pickaxe if the file for a line of code cannot be found')
     parser.add_argument('-b', '--branch', nargs='?', help='Git branch. If using --since, use this to '

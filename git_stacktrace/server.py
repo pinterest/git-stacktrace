@@ -12,6 +12,8 @@ from six.moves.urllib_parse import parse_qs
 from string import Template
 
 log = logging.getLogger(__name__)
+dir_path = os.path.dirname(os.path.realpath(__file__))
+
 
 def unescape(s):
     return HTMLParser().unescape(s)
@@ -122,17 +124,15 @@ class ResultsOutput(object):
     def messages_as_html(self):
         if self.messages is None:
             return ''
-        with open('git_stacktrace/templates/messages.html') as f:
-            t = Template(f.read())
-            return t.substitute(
+        with open(os.path.join(dir_path, 'templates', 'messages.html')) as f:
+            return Template(f.read()).substitute(
                 messages=escape(self.messages)
             ).encode('utf-8')
 
     def render_page(self):
-        with open('git_stacktrace/templates/page.html') as f:
-            t = Template(f.read())
-            optionType = 'by-date' if not self.args.type else self.args.type
-            return t.substitute(
+        optionType = 'by-date' if not self.args.type else self.args.type
+        with open(os.path.join(dir_path, 'templates', 'page.html')) as f:
+            return Template(f.read()).substitute(
                 pwd=escape(self.cwd),
                 messages=self.messages_as_html(),
                 range=escape(self.args.range),
@@ -168,9 +168,10 @@ class GitStacktraceApplication(object):
         codes = {
             200: "200 OK",
             404: "404 Not Found",
-            500: "500 Internal Server Error",
         }
-        self.start_response(codes[code], [('Content-type', content_type)])
+        self.start_response(
+            codes.get(code, "500 Internal Server Error"),
+            [('Content-type', content_type)])
 
     def _request_body(self):
         content_length = int(self.environ['CONTENT_LENGTH'])
@@ -184,11 +185,10 @@ class GitStacktraceApplication(object):
             self._set_headers()
         elif self.path == '/':
             try:
-                html = ResultsOutput(
-                    Args.from_qs(self.environ['QUERY_STRING'])
-                ).render_page()
+                args = Args.from_qs(self.environ['QUERY_STRING'])
+                out = ResultsOutput(args).render_page()
                 self._set_headers()
-                return html
+                return out
             except Exception:
                 log.exception('Unable to render trace page as html')
                 self._set_headers(500)
@@ -196,17 +196,16 @@ class GitStacktraceApplication(object):
             self._set_headers(404)
 
     def do_POST(self):
-        if (self.path == '/'):
+        if self.path == '/':
             try:
-                json = ResultsOutput(
-                    Args.from_json_body(self._request_body())
-                ).results_as_json()
+                args = Args.from_json_body(self._request_body())
+                out = ResultsOutput(args).results_as_json()
                 self._set_headers(200, 'application/json')
-                return json
+                return out
             except Exception as e:
                 log.exception('Unable to load trace results as json')
                 self._set_headers(500, 'application/json')
-                return json.dumps({'error': e})
+                return json.dumps({'error': str(e)})
         else:
             self._set_headers(404, 'application/json')
 
