@@ -93,7 +93,7 @@ class ResultsOutput(object):
             self.messages = (e.message)
             self.results = None
 
-    def get_json(self):
+    def results_as_json(self):
         if self.results is None:
             return json.dumps({
                 'errors': self.messages,
@@ -110,16 +110,7 @@ class ResultsOutput(object):
                 'commits': self.results.get_sorted_results_by_dict(),
             })
 
-    def get_html_messages(self):
-        if self.messages is None:
-            return ''
-        with open('git_stacktrace/templates/messages.html') as f:
-            t = Template(f.read())
-            return t.substitute(
-                messages=escape(self.messages)
-            ).encode('utf-8')
-
-    def get_html_results(self):
+    def results_as_html(self):
         if not self.results:
             return ''
         else:
@@ -128,13 +119,22 @@ class ResultsOutput(object):
                 ['<pre><code>' + escape(str(result)) + '</code></pre>' for result in sorted_results]
             )
 
-    def get_html(self):
+    def messages_as_html(self):
+        if self.messages is None:
+            return ''
+        with open('git_stacktrace/templates/messages.html') as f:
+            t = Template(f.read())
+            return t.substitute(
+                messages=escape(self.messages)
+            ).encode('utf-8')
+
+    def render_page(self):
         with open('git_stacktrace/templates/page.html') as f:
             t = Template(f.read())
             optionType = 'by-date' if not self.args.type else self.args.type
             return t.substitute(
                 pwd=escape(self.cwd),
-                messages=self.get_html_messages(),
+                messages=self.messages_as_html(),
                 range=escape(self.args.range),
                 branch=escape(self.args.branch),
                 since=escape(self.args.since),
@@ -145,7 +145,7 @@ class ResultsOutput(object):
                 isByRange='true' if optionType == 'by-range' else 'false',
                 byDateClass='active' if optionType == 'by-date' else '',
                 byRangeClass='active' if optionType == 'by-range' else '',
-                results=self.get_html_results()
+                results=self.results_as_html()
             ).encode('utf-8')
 
 
@@ -163,7 +163,7 @@ class GitStacktraceHandler(BaseHTTPRequestHandler):
             try:
                 page = ResultsOutput(Args.from_path(self.path))
                 self._set_headers()
-                self.wfile.write(page.get_html())
+                self.wfile.write(page.render_page())
             except Exception as e:
                 logging.error(e)
                 self._set_headers(500)
@@ -175,7 +175,7 @@ class GitStacktraceHandler(BaseHTTPRequestHandler):
             try:
                 page = ResultsOutput(Args.from_json_body(self.rfile.read(34)))
                 self._set_headers(200, 'application/json')
-                self.wfile.write(page.get_json())
+                self.wfile.write(page.results_as_json())
             except Exception as e:
                 logging.error(e)
                 self._set_headers(500, 'application/json')
