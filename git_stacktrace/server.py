@@ -189,8 +189,8 @@ class GitStacktraceApplication(object):
                 ).render_page()
                 self._set_headers()
                 return html
-            except Exception as e:
-                log.error(e)
+            except Exception:
+                log.exception('Unable to render trace page as html')
                 self._set_headers(500)
         else:
             self._set_headers(404)
@@ -204,7 +204,7 @@ class GitStacktraceApplication(object):
                 self._set_headers(200, 'application/json')
                 return json
             except Exception as e:
-                log.error(e)
+                log.exception('Unable to load trace results as json')
                 self._set_headers(500, 'application/json')
                 return json.dumps({'error': e})
         else:

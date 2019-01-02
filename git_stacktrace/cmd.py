@@ -39,9 +39,10 @@ def main():
     if args.server:
         print("Starting httpd on port %s..." % args.port)
         httpd = make_server('', args.port, server.application)
-        httpd.serve_forever()
-        httpd.close()
-        sys.exit(0)
+        try:
+            httpd.serve_forever()
+        except KeyboardInterrupt:
+            sys.exit(0)
 
     if args.since:
         git_range = api.convert_since(args.since, branch=args.branch)
