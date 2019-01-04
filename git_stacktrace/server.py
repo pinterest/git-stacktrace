@@ -3,7 +3,6 @@ from __future__ import print_function
 import json
 import logging
 import os
-import wsgiref
 
 from cgi import escape
 from git_stacktrace import api
