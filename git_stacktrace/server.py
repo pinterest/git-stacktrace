@@ -14,10 +14,6 @@ log = logging.getLogger(__name__)
 dir_path = os.path.dirname(os.path.realpath(__file__))
 
 
-def unescape(s):
-    return HTMLParser().unescape(s)
-
-
 class Args(object):
     @staticmethod
     def from_json_body(body):
@@ -25,13 +21,15 @@ class Args(object):
 
     @staticmethod
     def from_qs(query_string):
-        return Args(parse_qs(query_string))
+        return Args(parse_qs(query_string.lstrip('?')))
 
     def __init__(self, params):
         self.params = params
 
     def _get_field(self, field, default=''):
-        return unescape(self.params.get(field, [default])[0])
+        val = self.params.get(field, [default])
+        val = val[0] if isinstance(val, list) else val
+        return HTMLParser().unescape(val)
 
     @property
     def type(self):
@@ -72,7 +70,7 @@ class Args(object):
             if not api.valid_range(self.git_range):
                 return "Found no commits in '%s'" % self.git_range
         else:
-            return 'Invalid options type. Expected `by-date` or `by-range`.'
+            return 'Invalid `type` value. Expected `by-date` or `by-range`.'
         return None
 
     def get_results(self):
@@ -156,12 +154,16 @@ class GitStacktraceApplication(object):
 
     def __iter__(self):
         method = self.environ['REQUEST_METHOD']
-        if method == 'HEAD':
-            yield self.do_HEAD() or ''
-        elif method == 'GET':
+        if method == 'GET':
             yield self.do_GET() or ''
         elif method == 'POST':
             yield self.do_POST() or ''
+        elif method == 'HEAD':
+            self._set_headers()
+            yield ''
+        else:
+            self._set_headers(500)
+            yield ''
 
     def _set_headers(self, code=200, content_type='text/html'):
         codes = {
@@ -175,9 +177,6 @@ class GitStacktraceApplication(object):
     def _request_body(self):
         content_length = int(self.environ['CONTENT_LENGTH'])
         return self.environ['wsgi.input'].read(content_length)
-
-    def do_HEAD(self):
-        self._set_headers()
 
     def do_GET(self):
         if self.path == '/favicon.ico':
