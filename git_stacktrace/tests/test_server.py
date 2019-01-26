@@ -3,6 +3,7 @@ import mock
 from git_stacktrace.tests import base
 from git_stacktrace.server import Args
 
+
 class TestApi(base.TestCase):
 
     def test_default_args(self):
