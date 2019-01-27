@@ -8,6 +8,8 @@ import sys
 
 import git_stacktrace
 from git_stacktrace import api
+from git_stacktrace import server
+from wsgiref.simple_server import make_server
 
 
 def main():
@@ -18,6 +20,10 @@ def main():
     range_group.add_argument('--since', metavar="<date1>", help='show commits '
                              'more recent than a specific date (from git-log)')
     range_group.add_argument('range', nargs='?', help='git commit range to use')
+    range_group.add_argument('--server', action="store_true", help='start a '
+                             'webserver to visually interact with git-stacktrace')
+    parser.add_argument('--port', default=os.environ.get('GIT_STACKTRACE_PORT', 8080),
+                        type=int, help='Server port')
     parser.add_argument('-f', '--fast', action="store_true", help='Speed things up by not running '
                         'pickaxe if the file for a line of code cannot be found')
     parser.add_argument('-b', '--branch', nargs='?', help='Git branch. If using --since, use this to '
@@ -30,6 +36,14 @@ def main():
     logging.basicConfig(format='%(name)s:%(funcName)s:%(lineno)s: %(message)s')
     if args.debug:
         logging.getLogger().setLevel(logging.DEBUG)
+
+    if args.server:
+        print("Starting httpd on port %s..." % args.port)
+        httpd = make_server('', args.port, server.application)
+        try:
+            httpd.serve_forever()
+        except KeyboardInterrupt:
+            sys.exit(0)
 
     if args.since:
         git_range = api.convert_since(args.since, branch=args.branch)

@@ -35,6 +35,18 @@ For the CLI see: ``git stacktrace -h``
 
 For the Python API see: ``git_stacktrace/api.py``
 
+To run as a web server: ``git stacktrace --server --port=8080``
+or ``GIT_STACKTRACE_PORT=8080 git stacktrace --server``
+
+Use the web server as an API:
+
+.. code-block:: sh
+
+    $ curl \
+      -d '{"type":"by-date", "date":"1.day", "trace", "..."}' \
+      -H "Content-Type: application/json" \
+      -X POST http://localhost:8080/
+
 
 Examples
 --------

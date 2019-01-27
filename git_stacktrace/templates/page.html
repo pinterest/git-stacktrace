@@ -1,0 +1,188 @@
+<html>
+<head>
+  <title>Git Stacktrace</title>
+
+  <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.1.3/css/bootstrap.min.css" integrity="sha384-MCw98/SFnGE8fJT3GXwEOngsV7Zt27NXFoaoApmYm81iuXoPkFOJwJ8ERdknLPMO" crossorigin="anonymous">
+  <script src="https://code.jquery.com/jquery-3.3.1.slim.min.js" integrity="sha384-q8i/X+965DzO0rT7abK41JStQIAqVgRVzpbzo5smXKp4YfRvH+8abtTE1Pi6jizo" crossorigin="anonymous"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.3/umd/popper.min.js" integrity="sha384-ZMP7rVo3mIykV+2+9J3UJ46jBk0WLaUAdn689aCwoqbBJiSnjAK/l8WvCWPIPm49" crossorigin="anonymous"></script>
+  <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.1.3/js/bootstrap.min.js" integrity="sha384-ChfqqxuZUCnJSK3+MXmPNIyE6ZbWh2IMqE241rYiqJxyMiZ6OW/JmZQ5stwEULTy" crossorigin="anonymous"></script>
+</head>
+<body>
+  <div class="navbar navbar-expand-lg fixed-top navbar-dark bg-dark">
+    <a class="navbar-brand" href="#">Git Stacktrace</a>
+    <span class="navbar-text">
+      ${pwd}
+    </span>
+    <ul class="navbar-nav ml-auto">
+      <a class="nav-link" href="https://github.com/pinterest/git-stacktrace">Github</a>
+    </ul>
+  </div>
+  <div class="invisible navbar navbar-expand-lg navbar-dark bg-dark">
+    <span class="navbar-text">&nbsp;</span>
+  </div>
+  ${messages}
+
+  <main class="container">
+    <form method="GET">
+      <div class="card my-3">
+        <div class="card-header">
+          <div class="row">
+            <div class="col-3">
+              <div
+                class="nav flex-column nav-pills"
+                id="v-pills-tab"
+                role="tablist"
+                aria-orientation="vertical">
+                <input
+                  hidden
+                  type="text"
+                  name="option-type"
+                  value="${optionType}" />
+                <a
+                  class="nav-link btn-light ${byDateClass}"
+                  id="v-pills-by-date-tab"
+                  data-toggle="pill"
+                  data-input-name="option-type"
+                  data-input-value="by-date"
+                  href="#v-pills-by-date"
+                  role="tab"
+                  aria-controls="v-pills-by-date"
+                  aria-selected="${isByDate}">
+                  By Date
+                </a>
+                <a
+                  class="nav-link btn-light ${byRangeClass}"
+                  id="v-pills-by-range-tab"
+                  data-toggle="pill"
+                  data-input-name="option-type"
+                  data-input-value="by-range"
+                  href="#v-pills-by-range"
+                  role="tab"
+                  aria-controls="v-pills-by-range"
+                  aria-selected="${isByRange}">
+                  By Commit Range
+                </a>
+              </div>
+            </div>
+            <div class="col-9">
+              <div class="tab-content" id="v-pills-tabContent">
+                <div
+                  class="tab-pane fade show ${byDateClass}"
+                  id="v-pills-by-date"
+                  role="tabpanel"
+                  aria-labelledby="v-pills-by-date-tab">
+
+                  <div class="form-group row">
+                    <label
+                      for="since"
+                      class="col-form-label col-md-2"
+                      data-toggle="tooltip"
+                      data-placement="bottom"
+                      title="Show commits more recent than a specific date (from git-log)">
+                      Since
+                    </label>
+                    <div class="col-md-4">
+                      <input
+                        type="text"
+                        class="form-control"
+                        id="since"
+                        name="since"
+                        value="${since}" />
+                    </div>
+
+                    <label
+                      for="branch"
+                      class="col-form-label col-md-2"
+                      data-toggle="tooltip"
+                      data-placement="bottom"
+                      title="Specify which branch to run since on. Runs on current branch by default">
+                      Branch
+                    </label>
+                    <div class="col-md-4">
+                      <input
+                        type="text"
+                        class="form-control"
+                        id="branch"
+                        name="branch"
+                        value="${branch}" />
+                    </div>
+                  </div>
+                </div>
+                <div
+                  class="tab-pane fade show ${byRangeClass}"
+                  id="v-pills-by-range"
+                  role="tabpanel"
+                  aria-labelledby="v-pills-by-range-tab">
+                  <div class="form-group row">
+                    <label
+                      for="range"
+                      class="col-form-label col-md-2"
+                      data-toggle="tooltip"
+                      data-placement="bottom"
+                      title="Git commit range to use">
+                      Range
+                    </label>
+
+                    <div class="col-md-10">
+                      <input
+                        type="text"
+                        class="form-control"
+                        id="range"
+                        name="range"
+                        value="${range}" />
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <hr />
+
+          <div class="form-group row my-2">
+            <label for="trace" class="col-form-label col-md-2">Trace</label>
+            <div class="col-md-10">
+              <textarea class="form-control" id="trace" name="trace" rows="10">${trace}</textarea>
+            </div>
+          </div>
+
+          <div class="row">
+            <div class="form-group form-check my-2 ml-auto">
+              <input type="checkbox" class="form-check-input" id="fast" name="fast" value="on" ${fast}>
+              <label
+                class="form-check-label"
+                for="fast"
+                data-toggle="tooltip"
+                data-placement="top"
+                title="Speed things up by not running pickaxe if the file for a line of code cannot be found">
+                Fast
+              </label>
+            </div>
+
+            <div class="mx-3">
+              <button type="submit" class="btn btn-primary">Find Commit</button>
+            </div>
+          </div>
+
+        </div>
+        <div class="card-body">
+          <h5 class="card-title">Results</h5>
+          ${results}
+        </div>
+      </div>
+    </form>
+  </main>
+  <script>
+    // Need to escape dollar-sign in py templates, use `jQuery` variable instead
+    jQuery(function () {
+      jQuery('[data-toggle="tooltip"]').tooltip();
+      jQuery('a[data-toggle="pill"]').on('shown.bs.tab', function (e) {
+        var name = e.target.getAttribute('data-input-name');
+        var val = e.target.getAttribute('data-input-value');
+        console.log('setting', name, val)
+        document.querySelector('input[name="' + name + '"]').setAttribute('value', val);
+      });
+    });
+  </script>
+</body>
+</html>
