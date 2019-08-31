@@ -208,8 +208,41 @@ class JavaTraceback(Traceback):
         return [f for f in git_files if f.endswith(trace_filename)]
 
 
+class JavaScriptTraceback(Traceback):
+    def extract_traceback(self, lines):
+        if not lines[0].startswith('\t'):
+            self.header = lines[0] + '\n'
+        lines = [line for line in lines if line.startswith('\t')]
+        extracted = []
+        for line in lines:
+            extracted.append(self._extract_line(line))
+        self.lines = extracted
+        if not self.lines:
+            raise ParseException("Failed to parse stacktrace")
+
+    def _extract_line(self, line_string):
+        pattern = r"\t#\d\tat\s(?P<symbol>[^\s(]*)?(?:\s*)?\(?(?P<path>[^\s\?]+)(?:\S*)?\:(?P<line>\d+):(?:\d+)\)?"
+        frame = re.match(pattern, line_string)
+        if frame:
+            frame = frame.groupdict()
+        else:
+            raise ParseException("Unmatched frame")
+
+        return Line(frame.get('path'), frame.get('line'), frame.get('symbol'), None)
+
+    def traceback_format(self):
+        return [line.traceback_format() for line in self.lines]
+
+    def format_lines(self):
+        lines = self.traceback_format()
+        return ''.join(traceback.format_list(lines))
+
+    def file_match(self, trace_filename, git_files):
+        return [f for f in git_files if f.endswith(trace_filename)]
+
+
 def parse_trace(traceback_string):
-    languages = [PythonTraceback, JavaTraceback]
+    languages = [PythonTraceback, JavaTraceback, JavaScriptTraceback]
     for language in languages:
         try:
             return language(traceback_string)
