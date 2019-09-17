@@ -1,6 +1,11 @@
 Change Log
 ==========
 
+0.9.0
+-----
+
+* Add support for javascript (https://github.com/pinterest/git-stacktrace/pull/24)
+
 0.8.1
 -----
 
