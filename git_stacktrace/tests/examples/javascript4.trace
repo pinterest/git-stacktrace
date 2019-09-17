@@ -1,0 +1,4 @@
+TypeError: Cannot read property 'routes' of undefined
+	at routes (https://s.pinimg.com/mobile/js/entryChunk-mobile-16e4a90610ff33cbf2f6.js:12:307245)
+	at callback (webpack:///mnt/pinboard/webapp/node_modules/react-router/es/match.js:51:0)
+	at callback (webpack:///mnt/pinboard/webapp/node_modules/react-router/es/createTransitionManager.js:79:0)

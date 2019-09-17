@@ -1,0 +1,4 @@
+TypeError: Cannot read property 'routes' of undefined
+	at ha</a.Ja/</< (https://smartlock.google.com/client?clientId=694505692171-31closf3bcmlt59aeulg2j81ej68j6hk.apps.googleusercontent.com:88:389)
+	at callback (webpack:///mnt/pinboard/webapp/node_modules/react-router/es/match.js:51:0)
+	at callback (webpack:///mnt/pinboard/webapp/node_modules/react-router/es/createTransitionManager.js:79:0)

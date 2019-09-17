@@ -1,20 +1,19 @@
 git-stacktrace
 ==============
 
-git-stacktrace is designed to make it easy to figure out which commit caused a given stacktrace.
+git-stacktrace is a tool to help you associate git commits with stacktraces.
 
-git-stacktrace looks for:
+It helps you identify related commits by looking at:
 
-* commits in given range that touched files in the stacktrace
-* commits in given range that added/removed code present the stacktrace
-
+* commits in given range that touched files present in the stacktrace
+* commits in given range that added/removed code present in the stacktrace
 
 Supported Languages
 -------------------
 
 * Python
 * Java
-
+* `JavaScript <https://v8.dev/docs/stack-trace-api>`_
 
 Development
 ------------
@@ -31,7 +30,33 @@ Installation
 Usage
 -----
 
-For the CLI see: ``git stacktrace -h``
+Run ``git stacktrace`` within a git initialized directory.
+
+.. code-block:: sh
+
+    usage: git stacktrace [<options>] [<RANGE>] < stacktrace from stdin
+
+    Lookup commits related to a given stacktrace.
+
+    positional arguments:
+      range                 git commit range to use
+
+    optional arguments:
+      -h, --help            show this help message and exit
+      --since <date1>       show commits more recent than a specific date (from
+                            git-log)
+      --server              start a webserver to visually interact with git-
+                            stacktrace
+      --port PORT           Server port
+      -f, --fast            Speed things up by not running pickaxe if the file for
+                            a line of code cannot be found
+      -b [BRANCH], --branch [BRANCH]
+                            Git branch. If using --since, use this to specify
+                            which branch to run since on. Runs on current branch
+                            by default
+      --version             show program's version number and exit
+      -d, --debug           Enable debug logging
+
 
 For the Python API see: ``git_stacktrace/api.py``
 
