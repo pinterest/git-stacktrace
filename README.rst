@@ -13,7 +13,7 @@ Supported Languages
 
 * Python
 * Java
-* [JavaScript](https://v8.dev/docs/stack-trace-api)
+* `JavaScript <https://v8.dev/docs/stack-trace-api>`_
 
 Development
 ------------
@@ -30,32 +30,32 @@ Installation
 Usage
 -----
 
-Run `git stacktrace` within a git initialized directory.
+Run ``git stacktrace`` within a git initialized directory.
 
-```
-	usage: git stacktrace [<options>] [<RANGE>] < stacktrace from stdin
+.. code-block:: sh
 
-	Lookup commits related to a given stacktrace.
+    usage: git stacktrace [<options>] [<RANGE>] < stacktrace from stdin
 
-	positional arguments:
-	  range                 git commit range to use
+    Lookup commits related to a given stacktrace.
 
-	optional arguments:
-	  -h, --help            show this help message and exit
-	  --since <date1>       show commits more recent than a specific date (from
-							git-log)
-	  --server              start a webserver to visually interact with git-
-							stacktrace
-	  --port PORT           Server port
-	  -f, --fast            Speed things up by not running pickaxe if the file for
-							a line of code cannot be found
-	  -b [BRANCH], --branch [BRANCH]
-							Git branch. If using --since, use this to specify
-							which branch to run since on. Runs on current branch
-							by default
-	  --version             show program's version number and exit
-	  -d, --debug           Enable debug logging
-```
+    positional arguments:
+      range                 git commit range to use
+
+    optional arguments:
+      -h, --help            show this help message and exit
+      --since <date1>       show commits more recent than a specific date (from
+                            git-log)
+      --server              start a webserver to visually interact with git-
+                            stacktrace
+      --port PORT           Server port
+      -f, --fast            Speed things up by not running pickaxe if the file for
+                            a line of code cannot be found
+      -b [BRANCH], --branch [BRANCH]
+                            Git branch. If using --since, use this to specify
+                            which branch to run since on. Runs on current branch
+                            by default
+      --version             show program's version number and exit
+      -d, --debug           Enable debug logging
 
 
 For the Python API see: ``git_stacktrace/api.py``
