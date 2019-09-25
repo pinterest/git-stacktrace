@@ -98,7 +98,7 @@ class ResultsOutput(object):
                 'errors': self.messages,
                 'commits': [],
             })
-        elif len(self.results) == 0:
+        elif len(self.results.results) == 0:
             return json.dumps({
                 'errors': 'No matches found',
                 'commits': [],
