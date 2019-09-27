@@ -9,9 +9,17 @@ from git_stacktrace import api
 from six.moves.html_parser import HTMLParser
 from six.moves.urllib_parse import parse_qs
 from string import Template
+from datetime import date, datetime
 
 log = logging.getLogger(__name__)
 dir_path = os.path.dirname(os.path.realpath(__file__))
+
+def json_serial(obj):
+    """JSON serializer for objects not serializable by default json code"""
+
+    if isinstance(obj, (datetime, date)):
+        return obj.isoformat()
+    raise TypeError ("Type %s not serializable" % type(obj))
 
 
 class Args(object):
@@ -107,7 +115,7 @@ class ResultsOutput(object):
             return json.dumps({
                 'errors': None,
                 'commits': self.results.get_sorted_results_by_dict(),
-            })
+            }, default=json_serial)
 
     def results_as_html(self):
         if not self.results:
