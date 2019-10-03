@@ -110,13 +110,13 @@ class ResultsOutput(object):
             })
 
     def results_as_html(self):
-        if not self.results:
-            return ''
-        else:
+        if self.results and self.results.results:
             sorted_results = self.results.get_sorted_results()
             return '\n<hr/>\n'.join(
                 ['<pre><code>' + escape(str(result)) + '</code></pre>' for result in sorted_results]
             )
+        else:
+            return '\n<hr/>\n<pre><code>No results found.</code></pre>\n'
 
     def messages_as_html(self):
         if self.messages is None:
