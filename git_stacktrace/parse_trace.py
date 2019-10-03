@@ -205,7 +205,7 @@ class JavaTraceback(Traceback):
 
     def file_match(self, trace_filename, git_files):
         # git_filename is substring of trace_filename
-        return [f for f in git_files if f.endswith(trace_filename)]
+        return [f for f in git_files if trace_filename.endswith(f)]
 
 
 class JavaScriptTraceback(Traceback):
@@ -242,7 +242,7 @@ class JavaScriptTraceback(Traceback):
         return ''.join(traceback.format_list(lines))
 
     def file_match(self, trace_filename, git_files):
-        return [f for f in git_files if f.endswith(trace_filename)]
+        return [f for f in git_files if trace_filename.endswith(f)]
 
 
 def parse_trace(traceback_string):
