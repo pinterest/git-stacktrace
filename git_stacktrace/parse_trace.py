@@ -109,9 +109,7 @@ class PythonTraceback(Traceback):
             words = line.split(', ')
             if words[0].startswith(self.FILE_LINE_START):
                 if not (words[0].startswith('  File "') and words[1].startswith('line ') and words[2].startswith('in')):
-                    message = 'Something went wrong parsing stacktrace input.'
-                    log.debug("%s - '%s'", message, line)
-                    raise ParseException(message)
+                    raise ParseException
                 f = words[0].split('"')[1].strip()
                 line_number = int(words[1].split(' ')[1])
                 function_name = ' '.join(words[2].split(' ')[1:]).strip()
@@ -125,16 +123,14 @@ class PythonTraceback(Traceback):
                 try:
                     extracted.append(Line(filename=f, line_number=line_number, function_name=function_name, code=code))
                 except IndexError:
-                    raise ParseException("Incorrectly extracted traceback information")
+                    raise ParseException
         self.lines = extracted
         # Sanity check
         new_lines = traceback.format_list(self.traceback_format())
         new_lines = ('\n'.join([l.rstrip() for l in new_lines]))
         lines = ('\n'.join(lines))
         if lines != new_lines or not self.lines:
-            message = "Incorrectly extracted traceback information"
-            logging.debug("%s: original != parsed\noriginal:\n%s\nparsed:\n%s", message, lines, new_lines)
-            raise ParseException(message)
+            raise ParseException
 
     def traceback_format(self):
         return [line.traceback_format() for line in self.lines]
@@ -249,7 +245,9 @@ def parse_trace(traceback_string):
     languages = [PythonTraceback, JavaTraceback, JavaScriptTraceback]
     for language in languages:
         try:
-            return language(traceback_string)
+            results = language(traceback_string)
+            log.debug("Successfully parsed as %s", language)
+            return results
         except ParseException:
             log.debug("Failed to parse as %s", language)
             # Try next language
