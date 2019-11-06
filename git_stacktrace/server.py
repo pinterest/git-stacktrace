@@ -205,14 +205,15 @@ class GitStacktraceApplication(object):
     def do_POST(self):
         if self.path == '/':
             try:
-                args = Args.from_json_body(self._request_body())
+                body = self._request_body().decode()
+                args = Args.from_json_body(body)
                 out = ResultsOutput(args).results_as_json()
                 self._set_headers(200, 'application/json')
-                return out
+                return out.encode()
             except Exception as e:
                 log.exception('Unable to load trace results as json')
                 self._set_headers(500, 'application/json')
-                return json.dumps({'error': str(e)})
+                return json.dumps({'error': str(e)}).encode()
         else:
             self._set_headers(404, 'application/json')
 
