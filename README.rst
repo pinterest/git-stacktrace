@@ -68,7 +68,7 @@ Use the web server as an API:
 .. code-block:: sh
 
     $ curl \
-      -d '{"type":"by-date", "date":"1.day", "trace", "..."}' \
+      -d '{"option-type":"by-date", "since":"1.day", "trace":"..."}' \
       -H "Content-Type: application/json" \
       -X POST http://localhost:8080/
 
