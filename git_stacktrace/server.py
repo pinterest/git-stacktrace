@@ -98,7 +98,7 @@ class ResultsOutput(object):
             self.messages = args.validate()
             self.results = args.get_results()
         except Exception as e:
-            self.messages = (e.message)
+            self.messages = str(e)
             self.results = None
 
     def results_as_json(self):
@@ -106,17 +106,17 @@ class ResultsOutput(object):
             return json.dumps({
                 'errors': self.messages,
                 'commits': [],
-            })
+            }).encode()
         elif len(self.results.results) == 0:
             return json.dumps({
                 'errors': 'No matches found',
                 'commits': [],
-            })
+            }).encode()
         else:
             return json.dumps({
                 'errors': None,
                 'commits': self.results.get_sorted_results_by_dict(),
-            }, default=json_serial)
+            }, default=json_serial).encode()
 
     def results_as_html(self):
         if self.results and self.results.results:
@@ -133,7 +133,7 @@ class ResultsOutput(object):
         with open(os.path.join(dir_path, 'templates', 'messages.html')) as f:
             return Template(f.read()).substitute(
                 messages=escape(self.messages)
-            ).encode('utf-8')
+            )
 
     def render_page(self):
         optionType = 'by-date' if not self.args.type else self.args.type
@@ -164,15 +164,15 @@ class GitStacktraceApplication(object):
     def __iter__(self):
         method = self.environ['REQUEST_METHOD']
         if method == 'GET':
-            yield self.do_GET() or ''
+            yield self.do_GET() or b''
         elif method == 'POST':
-            yield self.do_POST() or ''
+            yield self.do_POST() or b''
         elif method == 'HEAD':
             self._set_headers()
-            yield ''
+            yield b''
         else:
             self._set_headers(500)
-            yield ''
+            yield b''
 
     def _set_headers(self, code=200, content_type='text/html'):
         codes = {
@@ -184,7 +184,7 @@ class GitStacktraceApplication(object):
             [('Content-type', content_type)])
 
     def _request_body(self):
-        content_length = int(self.environ['CONTENT_LENGTH'])
+        content_length = int(self.environ['CONTENT_LENGTH'], 0)
         return self.environ['wsgi.input'].read(content_length)
 
     def do_GET(self):
@@ -212,7 +212,7 @@ class GitStacktraceApplication(object):
             except Exception as e:
                 log.exception('Unable to load trace results as json')
                 self._set_headers(500, 'application/json')
-                return json.dumps({'error': str(e)})
+                return json.dumps({'error': str(e)}).encode()
         else:
             self._set_headers(404, 'application/json')
 
