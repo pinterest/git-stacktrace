@@ -1,6 +1,11 @@
 Change Log
 ==========
 
+1.0.0
+-----
+
+* Add Python 3.8 support drop Python 2.7 support (https://github.com/pinterest/git-stacktrace/pull/33)
+
 0.9.0
 -----
 
