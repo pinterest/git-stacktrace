@@ -27,7 +27,7 @@ jobs:
       if: matrix.python-version == '2.7' || matrix.python-version == '3.7'
       run: |
         pip install flake8
-        flake8 pymemcache/
+        flake8 git_stacktrace
     - name: Run Tests via Tox
       # Run tox using the version of Python in `PATH`
       run: tox -e py

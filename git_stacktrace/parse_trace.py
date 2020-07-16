@@ -129,7 +129,7 @@ class PythonTraceback(Traceback):
         self.lines = extracted
         # Sanity check
         new_lines = traceback.format_list(self.traceback_format())
-        new_lines = ('\n'.join([l.rstrip() for l in new_lines]))
+        new_lines = ('\n'.join([line.rstrip() for line in new_lines]))
         lines = ('\n'.join(lines))
         if lines != new_lines or not self.lines:
             message = "Incorrectly extracted traceback information"
