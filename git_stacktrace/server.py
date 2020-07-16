@@ -4,10 +4,10 @@ import json
 import logging
 import os
 
-from cgi import escape
+from html import escape
 from git_stacktrace import api
-from six.moves.html_parser import HTMLParser
-from six.moves.urllib_parse import parse_qs
+from html.parser import HTMLParser
+from urllib.parse import parse_qs
 from string import Template
 from datetime import date, datetime
 

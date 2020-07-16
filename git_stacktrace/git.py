@@ -8,7 +8,6 @@ import sys
 import shlex
 import os
 
-import six
 import whatthepatch
 
 SHA1_REGEX = re.compile(r'\b[0-9a-f]{40}\b')
@@ -38,7 +37,7 @@ class GitFile(object):
         return self.filename
 
     def __eq__(self, other):
-        if isinstance(other, six.string_types):
+        if isinstance(other, str):
             other_filename = other
         else:
             other_filename = other.filename
@@ -47,11 +46,7 @@ class GitFile(object):
 
 def run_command_status(*argv, **kwargs):
     if len(argv) == 1:
-        # for python2 compatibility with shlex
-        if sys.version_info < (3,) and isinstance(argv[0], six.text_type):
-            argv = shlex.split(argv[0].encode('utf-8'))
-        else:
-            argv = shlex.split(str(argv[0]))
+        argv = shlex.split(str(argv[0]))
     stdin = kwargs.pop('stdin', None)
     newenv = os.environ.copy()
     newenv['LANG'] = 'C'
@@ -105,7 +100,7 @@ def pickaxe(snippet, git_range, filename=None):
 
     Return list of commits that modified that snippet
     """
-    cmd = 'git', 'log', '-b', '--pretty=%H', '-S', six.u(snippet), git_range
+    cmd = 'git', 'log', '-b', '--pretty=%H', '-S', str(snippet), git_range
     if filename:
         cmd = cmd + ('--', filename,)
     commits = run_command(*cmd).splitlines()

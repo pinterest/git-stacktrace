@@ -9,8 +9,6 @@ import logging
 import re
 import traceback
 
-import six
-
 log = logging.getLogger(__name__)
 
 
@@ -35,8 +33,7 @@ class Line(object):
         return (self.trace_filename, self.line_number, self.function_name, self.code)
 
 
-@six.add_metaclass(abc.ABCMeta)
-class Traceback(object):
+class Traceback(object, metaclass=abc.ABCMeta):
 
     def __init__(self, blob):
         self.header = ""
@@ -52,7 +49,7 @@ class Traceback(object):
             if len(blob) == 1:
                 blob = blob[0].replace('\\n', '\n').split('\n')
         # Split by line
-        if type(blob) == str or type(blob) == six.text_type:
+        if isinstance(blob, str):
             lines = blob.split('\n')
         elif type(blob) == list:
             if len(blob) == 1:
