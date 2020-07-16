@@ -13,7 +13,7 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        python-version: [3.6, 3.7, 3.8, pypy3]
+        python-version: [3.6, 3.7, 3.8]
 
     steps:
     - uses: actions/checkout@v2
@@ -26,8 +26,9 @@ jobs:
     - name: Lint
       if: matrix.python-version == '3.8'
       run: |
-        pip install flake8
+        pip install flake8 black
         flake8 git_stacktrace
+        black --check .
     - name: Run Tests via Tox
       # Run tox using the version of Python in `PATH`
       run: tox -e py
