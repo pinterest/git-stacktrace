@@ -29,7 +29,7 @@ parse_trace = parse_trace.parse_trace
 
 def _longest_filename(matches):
     """find longest match by number of '/'."""
-    return max(matches, key=lambda filename: len(filename.split('/')))
+    return max(matches, key=lambda filename: len(filename.split("/")))
 
 
 def _lookup_files(commit_files, git_files, traceback, results):

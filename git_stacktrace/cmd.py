@@ -17,29 +17,42 @@ def main():
     description = "Lookup commits related to a given stacktrace."
     parser = argparse.ArgumentParser(usage=usage, description=description)
     range_group = parser.add_mutually_exclusive_group()
-    range_group.add_argument('--since', metavar="<date1>", help='show commits '
-                             'more recent than a specific date (from git-log)')
-    range_group.add_argument('range', nargs='?', help='git commit range to use')
-    range_group.add_argument('--server', action="store_true", help='start a '
-                             'webserver to visually interact with git-stacktrace')
-    parser.add_argument('--port', default=os.environ.get('GIT_STACKTRACE_PORT', 8080),
-                        type=int, help='Server port')
-    parser.add_argument('-f', '--fast', action="store_true", help='Speed things up by not running '
-                        'pickaxe if the file for a line of code cannot be found')
-    parser.add_argument('-b', '--branch', nargs='?', help='Git branch. If using --since, use this to '
-                        'specify which branch to run since on. Runs on current branch by default')
-    parser.add_argument('--version', action="version",
-                        version='%s version %s' % (os.path.split(sys.argv[0])[-1], git_stacktrace.__version__))
-    parser.add_argument('-d', '--debug', action='store_true', help='Enable debug logging')
+    range_group.add_argument(
+        "--since", metavar="<date1>", help="show commits " "more recent than a specific date (from git-log)"
+    )
+    range_group.add_argument("range", nargs="?", help="git commit range to use")
+    range_group.add_argument(
+        "--server", action="store_true", help="start a " "webserver to visually interact with git-stacktrace"
+    )
+    parser.add_argument("--port", default=os.environ.get("GIT_STACKTRACE_PORT", 8080), type=int, help="Server port")
+    parser.add_argument(
+        "-f",
+        "--fast",
+        action="store_true",
+        help="Speed things up by not running " "pickaxe if the file for a line of code cannot be found",
+    )
+    parser.add_argument(
+        "-b",
+        "--branch",
+        nargs="?",
+        help="Git branch. If using --since, use this to "
+        "specify which branch to run since on. Runs on current branch by default",
+    )
+    parser.add_argument(
+        "--version",
+        action="version",
+        version="%s version %s" % (os.path.split(sys.argv[0])[-1], git_stacktrace.__version__),
+    )
+    parser.add_argument("-d", "--debug", action="store_true", help="Enable debug logging")
     args = parser.parse_args()
 
-    logging.basicConfig(format='%(name)s:%(funcName)s:%(lineno)s: %(message)s')
+    logging.basicConfig(format="%(name)s:%(funcName)s:%(lineno)s: %(message)s")
     if args.debug:
         logging.getLogger().setLevel(logging.DEBUG)
 
     if args.server:
         print("Starting httpd on port %s..." % args.port)
-        httpd = make_server('', args.port, server.application)
+        httpd = make_server("", args.port, server.application)
         try:
             httpd.serve_forever()
         except KeyboardInterrupt:

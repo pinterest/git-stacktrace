@@ -18,8 +18,10 @@ class ParseException(Exception):
 
 class Line(object):
     """Track data for each line in stacktrace"""
-    def __init__(self, filename, line_number, function_name, code, class_name=None,
-                 native_method=False, unknown_source=False):
+
+    def __init__(
+        self, filename, line_number, function_name, code, class_name=None, native_method=False, unknown_source=False
+    ):
         self.trace_filename = filename
         self.line_number = line_number
         self.function_name = function_name
@@ -34,7 +36,6 @@ class Line(object):
 
 
 class Traceback(object, metaclass=abc.ABCMeta):
-
     def __init__(self, blob):
         self.header = ""
         self.footer = ""
@@ -45,15 +46,15 @@ class Traceback(object, metaclass=abc.ABCMeta):
         """Cleanup input."""
         # remove empty lines
         if type(blob) == list:
-            blob = [line for line in blob if line.strip() != '']
+            blob = [line for line in blob if line.strip() != ""]
             if len(blob) == 1:
-                blob = blob[0].replace('\\n', '\n').split('\n')
+                blob = blob[0].replace("\\n", "\n").split("\n")
         # Split by line
         if isinstance(blob, str):
-            lines = blob.split('\n')
+            lines = blob.split("\n")
         elif type(blob) == list:
             if len(blob) == 1:
-                lines = blob[0].split('\n')
+                lines = blob[0].split("\n")
             else:
                 lines = [line.rstrip() for line in blob]
         else:
@@ -92,10 +93,10 @@ class PythonTraceback(Traceback):
     def extract_traceback(self, lines):
         """Convert traceback string into a traceback.extract_tb format"""
         # filter out traceback lines
-        self.header = lines[0] + '\n'
-        if lines[-1] and not lines[-1].startswith(' '):
-            self.footer = lines[-1] + '\n'
-        lines = [line.rstrip() for line in lines if line.startswith('  ')]
+        self.header = lines[0] + "\n"
+        if lines[-1] and not lines[-1].startswith(" "):
+            self.footer = lines[-1] + "\n"
+        lines = [line.rstrip() for line in lines if line.startswith("  ")]
         # extract
         extracted = []
         code_line = False
@@ -103,15 +104,15 @@ class PythonTraceback(Traceback):
             if code_line:
                 code_line = False
                 continue
-            words = line.split(', ')
+            words = line.split(", ")
             if words[0].startswith(self.FILE_LINE_START):
-                if not (words[0].startswith('  File "') and words[1].startswith('line ') and words[2].startswith('in')):
-                    message = 'Something went wrong parsing stacktrace input.'
+                if not (words[0].startswith('  File "') and words[1].startswith("line ") and words[2].startswith("in")):
+                    message = "Something went wrong parsing stacktrace input."
                     log.debug("%s - '%s'", message, line)
                     raise ParseException(message)
                 f = words[0].split('"')[1].strip()
-                line_number = int(words[1].split(' ')[1])
-                function_name = ' '.join(words[2].split(' ')[1:]).strip()
+                line_number = int(words[1].split(" ")[1])
+                function_name = " ".join(words[2].split(" ")[1:]).strip()
                 if len(lines) == i + 1 or lines[i + 1].startswith(self.FILE_LINE_START):
                     # Not all lines have code in the traceback
                     code = None
@@ -126,8 +127,8 @@ class PythonTraceback(Traceback):
         self.lines = extracted
         # Sanity check
         new_lines = traceback.format_list(self.traceback_format())
-        new_lines = ('\n'.join([line.rstrip() for line in new_lines]))
-        lines = ('\n'.join(lines))
+        new_lines = "\n".join([line.rstrip() for line in new_lines])
+        lines = "\n".join(lines)
         if lines != new_lines or not self.lines:
             message = "Incorrectly extracted traceback information"
             logging.debug("%s: original != parsed\noriginal:\n%s\nparsed:\n%s", message, lines, new_lines)
@@ -138,7 +139,7 @@ class PythonTraceback(Traceback):
 
     def format_lines(self):
         lines = self.traceback_format()
-        return ''.join(traceback.format_list(lines))
+        return "".join(traceback.format_list(lines))
 
     def file_match(self, trace_filename, git_files):
         # trace_filename is substring of git_filename
@@ -146,11 +147,10 @@ class PythonTraceback(Traceback):
 
 
 class JavaTraceback(Traceback):
-
     def extract_traceback(self, lines):
-        if not lines[0].startswith('\t'):
-            self.header = lines[0] + '\n'
-        lines = [line for line in lines if line.startswith('\t')]
+        if not lines[0].startswith("\t"):
+            self.header = lines[0] + "\n"
+        lines = [line for line in lines if line.startswith("\t")]
         extracted = []
         for line in lines:
             extracted.append(self._extract_line(line))
@@ -159,7 +159,7 @@ class JavaTraceback(Traceback):
             raise ParseException("Failed to parse stacktrace")
 
     def _extract_line(self, line_string):
-        if not line_string.startswith('\t'):
+        if not line_string.startswith("\t"):
             raise ParseException("Missing tab at beginning of line")
 
         native_method = False
@@ -177,8 +177,8 @@ class JavaTraceback(Traceback):
         if tokens[0] != "at" or len(tokens) != 5:
             raise ParseException("Invalid Java Exception")
 
-        path = tokens[1].split('.')
-        filename = '/'.join(path[:-2] + [tokens[2]])
+        path = tokens[1].split(".")
+        filename = "/".join(path[:-2] + [tokens[2]])
         function_name = path[-1]
         if not native_method and not unknown_source:
             line_number = int(tokens[3])
@@ -188,8 +188,8 @@ class JavaTraceback(Traceback):
         return Line(filename, line_number, function_name, None, class_name, native_method, unknown_source)
 
     def _format_line(self, line):
-        split = line.trace_filename.split('/')
-        path = '.'.join(split[:-1])
+        split = line.trace_filename.split("/")
+        path = ".".join(split[:-1])
         filename = split[-1]
         if line.native_method:
             return "\tat %s.%s.%s(Native Method)\n" % (path, line.class_name, line.function_name)
@@ -198,7 +198,7 @@ class JavaTraceback(Traceback):
         return "\tat %s.%s.%s(%s:%d)\n" % (path, line.class_name, line.function_name, filename, line.line_number)
 
     def format_lines(self):
-        return ''.join(map(self._format_line, self.lines))
+        return "".join(map(self._format_line, self.lines))
 
     def file_match(self, trace_filename, git_files):
         # git_filename is substring of trace_filename
@@ -209,9 +209,9 @@ class JavaScriptTraceback(Traceback):
     # This class matches a stacktrace that looks similar to https://v8.dev/docs/stack-trace-api
 
     def extract_traceback(self, lines):
-        if not lines[0].startswith('\t'):
-            self.header = lines[0] + '\n'
-        lines = [line for line in lines if line.startswith('\t')]
+        if not lines[0].startswith("\t"):
+            self.header = lines[0] + "\n"
+        lines = [line for line in lines if line.startswith("\t")]
         extracted = []
         for line in lines:
             extracted.append(self._extract_line(line))
@@ -229,14 +229,14 @@ class JavaScriptTraceback(Traceback):
             log.debug("Failed to parse frame %s", line_string)
             raise ParseException
 
-        return Line(frame.get('path'), frame.get('line'), frame.get('symbol'), None)
+        return Line(frame.get("path"), frame.get("line"), frame.get("symbol"), None)
 
     def traceback_format(self):
         return [line.traceback_format() for line in self.lines]
 
     def format_lines(self):
         lines = self.traceback_format()
-        return ''.join(traceback.format_list(lines))
+        return "".join(traceback.format_list(lines))
 
     def file_match(self, trace_filename, git_files):
         return [f for f in git_files if trace_filename.endswith(f)]

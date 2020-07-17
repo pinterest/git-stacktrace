@@ -78,7 +78,7 @@ class Result(object):
 
     def __str__(self):
         result = ""
-        result += git.format_one_commit(self.commit) + '\n'
+        result += git.format_one_commit(self.commit) + "\n"
         if len(self.files_added) > 0:
             result += "Files Added:\n"
         for f in sorted(self.files_added):
@@ -107,22 +107,28 @@ class Result(object):
 
     def __iter__(self):
         self._lazy_fetch()
-        yield 'commit', self.commit
-        yield 'summary', self.summary
-        yield 'subject', self.subject
-        yield 'body', self.body
-        yield 'url', self.url
-        yield 'author', self.author
-        yield 'date', self.date
-        yield 'files_added', list(self.files_added)
-        yield 'files_modified', list(self.files_modified)
-        yield 'files_deleted', list(self.files_deleted)
-        yield 'lines_added', list(self.lines_added)
-        yield 'lines_removed', list(self.lines_removed)
+        yield "commit", self.commit
+        yield "summary", self.summary
+        yield "subject", self.subject
+        yield "body", self.body
+        yield "url", self.url
+        yield "author", self.author
+        yield "date", self.date
+        yield "files_added", list(self.files_added)
+        yield "files_modified", list(self.files_modified)
+        yield "files_deleted", list(self.files_deleted)
+        yield "lines_added", list(self.lines_added)
+        yield "lines_removed", list(self.lines_removed)
 
     def rank(self):
-        return (len(self.files_modified) + len(self.files_deleted) * 2 + len(self.files_added) * 3 +
-                len(self.lines_added) * 3 + len(self.lines_removed) * 2 + self._line_numbers_matched * 4)
+        return (
+            len(self.files_modified)
+            + len(self.files_deleted) * 2
+            + len(self.files_added) * 3
+            + len(self.lines_added) * 3
+            + len(self.lines_removed) * 2
+            + self._line_numbers_matched * 4
+        )
 
     def __eq__(self, other):
         return self.commit == other.commit
