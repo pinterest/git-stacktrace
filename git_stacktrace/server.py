@@ -4,9 +4,8 @@ import json
 import logging
 import os
 
-from html import escape
+from html import escape, unescape
 from git_stacktrace import api
-from html.parser import HTMLParser
 from urllib.parse import parse_qs
 from string import Template
 from datetime import date, datetime
@@ -38,7 +37,7 @@ class Args(object):
     def _get_field(self, field, default=""):
         val = self.params.get(field, [default])
         val = val[0] if isinstance(val, list) else val
-        return HTMLParser().unescape(val)
+        return unescape(val)
 
     @property
     def type(self):
