@@ -102,12 +102,26 @@ class ResultsOutput(object):
 
     def results_as_json(self):
         if self.results is None:
-            return json.dumps({"errors": self.messages, "commits": [],}).encode()
+            return json.dumps(
+                {
+                    "errors": self.messages,
+                    "commits": [],
+                }
+            ).encode()
         elif len(self.results.results) == 0:
-            return json.dumps({"errors": "No matches found", "commits": [],}).encode()
+            return json.dumps(
+                {
+                    "errors": "No matches found",
+                    "commits": [],
+                }
+            ).encode()
         else:
             return json.dumps(
-                {"errors": None, "commits": self.results.get_sorted_results_by_dict(),}, default=json_serial
+                {
+                    "errors": None,
+                    "commits": self.results.get_sorted_results_by_dict(),
+                },
+                default=json_serial,
             ).encode()
 
     def results_as_html(self):

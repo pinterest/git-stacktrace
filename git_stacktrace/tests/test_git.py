@@ -21,7 +21,7 @@ class TestGitFile(base.TestCase):
         git_file1 = git.GitFile("file1", "M")
         git_file = git.GitFile("file1", "A")
         self.assertEqual(git_file, git_file1)
-        self.assertEqual(git_file, u"file1")
+        self.assertEqual(git_file, "file1")
         self.assertEqual(git_file, "file1")
 
 
@@ -94,11 +94,11 @@ class TestGit(base.TestCase):
         mocked_command.return_value = ""
 
         git.pickaxe("for f in sorted(self.files_added):", "hash1..hash2")
-        expected = ("git", "log", "-b", "--pretty=%H", "-S", u"for f in sorted(self.files_added):", "hash1..hash2")
+        expected = ("git", "log", "-b", "--pretty=%H", "-S", "for f in sorted(self.files_added):", "hash1..hash2")
         mocked_command.assert_called_with(*expected)
 
         git.pickaxe("if 'a/b' in z", "hash1..hash2")
-        expected = ("git", "log", "-b", "--pretty=%H", "-S", u"if 'a/b' in z", "hash1..hash2")
+        expected = ("git", "log", "-b", "--pretty=%H", "-S", "if 'a/b' in z", "hash1..hash2")
         mocked_command.assert_called_with(*expected)
 
         git.pickaxe("for f in sorted(self.files_added):", "hash1..hash2", "filename")
@@ -108,7 +108,7 @@ class TestGit(base.TestCase):
             "-b",
             "--pretty=%H",
             "-S",
-            u"for f in sorted(self.files_added):",
+            "for f in sorted(self.files_added):",
             "hash1..hash2",
             "--",
             "filename",

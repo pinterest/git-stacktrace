@@ -2,6 +2,7 @@
 
 Currently only supports python stacktraces
 """
+
 from __future__ import print_function
 
 import abc
