@@ -48,9 +48,9 @@ source_suffix = ".rst"
 master_doc = "index"
 
 # General information about the project.
-project = u"git-stacktrace"
-copyright = u"2017 Pinterest, Inc"
-author = u"Joe Gordon"
+project = "git-stacktrace"
+copyright = "2017 Pinterest, Inc"
+author = "Joe Gordon"
 
 
 # The version info for the project you're documenting, acts as replacement for
@@ -142,7 +142,7 @@ latex_elements = {
 # (source start file, target name, title,
 #  author, documentclass [howto, manual, or own class]).
 latex_documents = [
-    (master_doc, "git-stacktrace.tex", u"git-stacktrace Documentation", u"Joe Gordon", "manual"),
+    (master_doc, "git-stacktrace.tex", "git-stacktrace Documentation", "Joe Gordon", "manual"),
 ]
 
 
@@ -150,7 +150,7 @@ latex_documents = [
 
 # One entry per manual page. List of tuples
 # (source start file, name, description, authors, manual section).
-man_pages = [(master_doc, "git-stacktrace", u"git-stacktrace Documentation", [author], 1)]
+man_pages = [(master_doc, "git-stacktrace", "git-stacktrace Documentation", [author], 1)]
 
 
 # -- Options for Texinfo output -------------------------------------------
@@ -162,7 +162,7 @@ texinfo_documents = [
     (
         master_doc,
         "git-stacktrace",
-        u"git-stacktrace Documentation",
+        "git-stacktrace Documentation",
         author,
         "git-stacktrace",
         "One line description of project.",

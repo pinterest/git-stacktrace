@@ -101,7 +101,10 @@ def pickaxe(snippet, git_range, filename=None):
     """
     cmd = "git", "log", "-b", "--pretty=%H", "-S", str(snippet), git_range
     if filename:
-        cmd = cmd + ("--", filename,)
+        cmd = cmd + (
+            "--",
+            filename,
+        )
     commits = run_command(*cmd).splitlines()
     commits = [(commit, line_removed(snippet, commit)) for commit in commits]
     # Couldn't find a good way to POSIX regex escape the code and use regex

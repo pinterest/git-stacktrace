@@ -4,9 +4,8 @@ import json
 import logging
 import os
 
-from html import escape
+from html import escape, unescape
 from git_stacktrace import api
-from html.parser import HTMLParser
 from urllib.parse import parse_qs
 from string import Template
 from datetime import date, datetime
@@ -38,7 +37,7 @@ class Args(object):
     def _get_field(self, field, default=""):
         val = self.params.get(field, [default])
         val = val[0] if isinstance(val, list) else val
-        return HTMLParser().unescape(val)
+        return unescape(val)
 
     @property
     def type(self):
@@ -103,12 +102,26 @@ class ResultsOutput(object):
 
     def results_as_json(self):
         if self.results is None:
-            return json.dumps({"errors": self.messages, "commits": [],}).encode()
+            return json.dumps(
+                {
+                    "errors": self.messages,
+                    "commits": [],
+                }
+            ).encode()
         elif len(self.results.results) == 0:
-            return json.dumps({"errors": "No matches found", "commits": [],}).encode()
+            return json.dumps(
+                {
+                    "errors": "No matches found",
+                    "commits": [],
+                }
+            ).encode()
         else:
             return json.dumps(
-                {"errors": None, "commits": self.results.get_sorted_results_by_dict(),}, default=json_serial
+                {
+                    "errors": None,
+                    "commits": self.results.get_sorted_results_by_dict(),
+                },
+                default=json_serial,
             ).encode()
 
     def results_as_html(self):

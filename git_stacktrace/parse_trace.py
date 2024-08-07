@@ -2,6 +2,7 @@
 
 Currently only supports python stacktraces
 """
+
 from __future__ import print_function
 
 import abc
@@ -45,14 +46,14 @@ class Traceback(object, metaclass=abc.ABCMeta):
     def prep_blob(self, blob):
         """Cleanup input."""
         # remove empty lines
-        if type(blob) == list:
+        if isinstance(blob, list):
             blob = [line for line in blob if line.strip() != ""]
             if len(blob) == 1:
                 blob = blob[0].replace("\\n", "\n").split("\n")
         # Split by line
         if isinstance(blob, str):
             lines = blob.split("\n")
-        elif type(blob) == list:
+        elif isinstance(blob, list):
             if len(blob) == 1:
                 lines = blob[0].split("\n")
             else:
