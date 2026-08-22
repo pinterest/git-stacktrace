@@ -114,3 +114,15 @@ class TestGit(base.TestCase):
             "filename",
         )
         mocked_command.assert_called_with(*expected)
+
+
+class TestValidateGitRevisionArg(base.TestCase):
+    def test_accepts_normal_range_and_branch(self):
+        git.validate_git_revision_arg("abc..def", "git range")
+        git.validate_git_revision_arg("origin/master", "branch")
+        git.validate_git_revision_arg("", "branch")
+        git.validate_git_revision_arg(None, "branch")
+
+    def test_rejects_leading_dash(self):
+        self.assertRaises(ValueError, git.validate_git_revision_arg, "--output=/tmp/x", "git range")
+        self.assertRaises(ValueError, git.validate_git_revision_arg, "-S", "branch")

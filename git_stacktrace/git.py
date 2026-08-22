@@ -15,6 +15,14 @@ SHA1_REGEX = re.compile(r"\b[0-9a-f]{40}\b")
 CommitInfo = collections.namedtuple("CommitInfo", ["summary", "subject", "body", "url", "author", "date"])
 
 
+def validate_git_revision_arg(value, what="git argument"):
+    """Reject values git would treat as options (argument injection via leading '-')."""
+    if value is None or value == "":
+        return
+    if value.startswith("-"):
+        raise ValueError("Invalid %s %r: values must not start with '-'" % (what, value))
+
+
 class GitFile(object):
     """Track filename and if file was added/removed or modified."""
 
@@ -74,6 +82,7 @@ def files_touched(git_range):
 
     Generate a dictionary of files modified by the commits in range
     """
+    validate_git_revision_arg(git_range, "git range")
     cmd = "git", "log", "--pretty=%H", "--raw", git_range
     data = run_command(*cmd)
     commits = collections.defaultdict(list)
@@ -99,6 +108,7 @@ def pickaxe(snippet, git_range, filename=None):
 
     Return list of commits that modified that snippet
     """
+    validate_git_revision_arg(git_range, "git range")
     cmd = "git", "log", "-b", "--pretty=%H", "-S", str(snippet), git_range
     if filename:
         cmd = cmd + (
@@ -193,6 +203,7 @@ def valid_range(git_range):
 
     Returns True or False
     """
+    validate_git_revision_arg(git_range, "git range")
     cmd = "git", "log", "--oneline", git_range
     data = run_command(*cmd)
     lines = data.splitlines()
@@ -200,6 +211,8 @@ def valid_range(git_range):
 
 
 def convert_since(since, branch=None):
+    validate_git_revision_arg(since, "since")
+    validate_git_revision_arg(branch, "branch")
     cmd = "git", "log", "--pretty=%H", "--since=%s" % since
     if branch:
         cmd = cmd + (branch,)
@@ -211,7 +224,9 @@ def convert_since(since, branch=None):
 
 
 def files(git_range):
+    validate_git_revision_arg(git_range, "git range")
     commit = git_range.split(".")[-1]
+    validate_git_revision_arg(commit, "git commit")
     cmd = "git", "ls-tree", "-r", "--name-only", commit
     data = run_command(*cmd)
     files = data.splitlines()
