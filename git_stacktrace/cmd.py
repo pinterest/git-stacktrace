@@ -51,8 +51,11 @@ def main():
         logging.getLogger().setLevel(logging.DEBUG)
 
     if args.server:
-        print("Starting httpd on port %s..." % args.port)
-        httpd = make_server("", args.port, server.application)
+        # Bind to loopback only; the HTTP API accepts unauthenticated query
+        # params that are passed to git, so it must not be reachable on LAN.
+        host = "127.0.0.1"
+        print("Starting httpd on %s port %s..." % (host, args.port))
+        httpd = make_server(host, args.port, server.application)
         try:
             httpd.serve_forever()
         except KeyboardInterrupt:

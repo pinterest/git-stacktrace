@@ -83,3 +83,15 @@ class TestApi(base.TestCase):
         mock_valid_range.return_value = True
         args = Args({"option-type": "by-range"})
         self.assertIsNone(args.validate())
+
+    def test_args_byRange_rejects_option_injection(self):
+        args = Args({"option-type": "by-range", "range": "--output=/tmp/sensitive.txt"})
+        message = args.validate()
+        self.assertIn("must not start with '-'", message)
+
+    def test_args_byDate_rejects_branch_option_injection(self):
+        args = Args(
+            {"option-type": "by-date", "since": "1.day", "branch": "--output=/tmp/sensitive.txt"}
+        )
+        message = args.validate()
+        self.assertIn("must not start with '-'", message)

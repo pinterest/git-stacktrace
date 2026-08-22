@@ -70,13 +70,19 @@ class Args(object):
         if self.type == "by-date":
             if not self.since:
                 return "Missing `since` value. Plese specify a date."
-            self.git_range = api.convert_since(self.since, branch=self.branch)
+            try:
+                self.git_range = api.convert_since(self.since, branch=self.branch)
+            except ValueError as e:
+                return str(e)
             if not api.valid_range(self.git_range):
                 return "Found no commits in '%s'" % self.git_range
         elif self.type == "by-range":
             self.git_range = self.range
-            if not api.valid_range(self.git_range):
-                return "Found no commits in '%s'" % self.git_range
+            try:
+                if not api.valid_range(self.git_range):
+                    return "Found no commits in '%s'" % self.git_range
+            except ValueError as e:
+                return str(e)
         else:
             return "Invalid `type` value. Expected `by-date` or `by-range`."
         return None
