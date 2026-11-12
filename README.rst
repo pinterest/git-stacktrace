@@ -1,3 +1,6 @@
+[Archival Notice] 
+This repository is no longer maintained and is archived as of 11/12/2026. No further issues, pull requests, or updates will be accepted. The existing code and history will remain available for reference.
+
 git-stacktrace
 ==============
 
